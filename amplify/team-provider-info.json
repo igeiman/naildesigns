@@ -1,0 +1,19 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "nail-designs-20190414134207-authRole",
+            "UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190414134207-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190414134207-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "nail-designs-20190414134207-deployment",
+            "UnauthRoleName": "nail-designs-20190414134207-unauthRole",
+            "StackName": "nail-designs-20190414134207",
+            "StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-20190414134207/a033b4b0-5edc-11e9-b1e8-12b31d3117be"
+        },
+        "categories": {
+            "auth": {
+                "cognitoafe4cbce": {}
+            }
+        }
+    }
+}

@@ -1,0 +1,4 @@
+{
+	"S3UserfilesBucketName": "naildesigns-dev",
+	"DynamoDBPhotosTableArn": "arn:aws:dynamodb:us-east-1:357527257673:table/Photo-w5tx4feyyndxvk74yjhen7ocbe-dev"
+}
