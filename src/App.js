@@ -1,4 +1,4 @@
-// src/App.js
+// photo-albums/src/App.js
 
 import React, { Component } from 'react';
 
@@ -48,24 +48,24 @@ const SubscribeToNewAlbums = `
 
 const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
     getAlbum(id: $id) {
-    id
-    name
-    photos(sortDirection: DESC, nextToken: $nextTokenForPhotos) {
-      nextToken
-      items {
-        thumbnail {
-          width
-          height
-          key
-				}
-				fullsize {
-					width
-					height
-					key
-				}
-      }
+        id
+        name
+        photos(sortDirection: DESC, nextToken: $nextTokenForPhotos) {
+            nextToken
+            items {
+                thumbnail {
+                    width
+                    height
+                    key
+                }
+                fullsize {
+                    width
+                    height
+                    key
+                }
+            }
+        }
     }
-  }
 }
 `;
 
@@ -147,6 +147,7 @@ class Search extends React.Component {
       );
   }
 }
+
 
 class S3ImageUpload extends React.Component {
   constructor(props) {
@@ -247,8 +248,6 @@ class PhotosList extends React.Component {
 }
 
 
-
-
 class NewAlbum extends Component {
   constructor(props) {
     super(props);
@@ -296,30 +295,6 @@ class NewAlbum extends Component {
     }
 }
 
-class Lightbox extends Component {
-  render() {
-    return (
-      <Modal
-        open={this.props.photo !== null}
-        onClose={this.props.onClose}
-      >
-        <Modal.Content>
-          <Container textAlign='center'>
-            {
-              this.props.photo?
-              <S3Image
-                imgKey={this.props.photo.key.replace('public/', '')}
-                theme={{ photoImg: { maxWidth: '100%' } }}
-                onClick={this.props.onClose}
-              /> :
-              null
-            }
-          </Container>
-        </Modal.Content>
-      </Modal>
-    );
-  }
-}
 
 class AlbumsList extends React.Component {
   albumItems() {
@@ -393,6 +368,32 @@ class AlbumDetailsLoader extends React.Component {
 }
 
 
+class Lightbox extends Component {
+  render() {
+    return (
+      <Modal
+        open={this.props.photo !== null}
+        onClose={this.props.onClose}
+      >
+        <Modal.Content>
+          <Container textAlign='center'>
+            {
+              this.props.photo?
+              <S3Image
+                imgKey={this.props.photo.key.replace('public/', '')}
+                theme={{ photoImg: { maxWidth: '100%' } }}
+                onClick={this.props.onClose}
+              /> :
+              null
+            }
+          </Container>
+        </Modal.Content>
+      </Modal>
+    );
+  }
+}
+
+
 class AlbumDetails extends Component {
     render() {
         if (!this.props.album) return 'Loading album...';
@@ -417,6 +418,7 @@ class AlbumDetails extends Component {
 }
 
 
+
 class AlbumsListLoader extends React.Component {
     onNewAlbum = (prevQuery, newData) => {
         // When we get data about a new album, we need to put in into an object
@@ -433,8 +435,9 @@ class AlbumsListLoader extends React.Component {
                 subscription={graphqlOperation(SubscribeToNewAlbums)}
                 onSubscriptionMsg={this.onNewAlbum}
             >
-                {({ data, loading }) => {
+                {({ data, loading, errors }) => {
                     if (loading) { return <div>Loading...</div>; }
+                    if (errors.length > 0) { return <div>{JSON.stringify(errors)}</div>; }
                     if (!data.listAlbums) return;
 
                 return <AlbumsList albums={data.listAlbums.items} />;
@@ -445,6 +448,7 @@ class AlbumsListLoader extends React.Component {
 }
 
 
+
 class App extends Component {
   render() {
     return (
@@ -453,7 +457,7 @@ class App extends Component {
           <Grid.Column>
             <Route path="/" exact component={NewAlbum}/>
             <Route path="/" exact component={AlbumsListLoader}/>
-						<Route path="/" exact component={Search}/>
+            <Route path="/" exact component={Search}/>
 
             <Route
               path="/albums/:albumId"

@@ -1,6 +1,9 @@
 # amplify/backend/api/photo-albums/schema.graphql
 
-type Album @model @auth(rules: [{allow: owner}]) {
+type Album @model @auth(rules: [
+	{allow: owner}
+	{ allow: owner, ownerField: "members", queries: [get, list], mutations: null }
+	]) {
     id: ID!
     name: String!
     photos: [Photo] @connection(name: "AlbumPhotos")
