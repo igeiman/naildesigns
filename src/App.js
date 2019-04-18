@@ -7,7 +7,8 @@ import { Container, Divider, Form, Grid, Header, Input, List, Modal, Segment } f
 import {v4 as uuid} from 'uuid';
 
 import { Connect, S3Image, withAuthenticator } from 'aws-amplify-react';
-import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify';
+import { ChatBot, AmplifyTheme } from 'aws-amplify-react';
+import Amplify, { API, graphqlOperation, Storage, Interactions } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
 Amplify.configure(aws_exports);
@@ -87,7 +88,6 @@ const SearchPhotos = `query SearchPhotos($label: String!) {
     }
   }
 }`;
-
 
 class Search extends React.Component {
   constructor(props) {
@@ -447,7 +447,54 @@ class AlbumsListLoader extends React.Component {
     }
 }
 
+const myTheme = {
+  ...AmplifyTheme,
+  sectionHeader: {
+    ...AmplifyTheme.sectionHeader,
+    backgroundColor: '#ff6600'
+  }
+};
 
+const customVoiceConfig = {
+	silenceDetectionConfig: {
+			time: 2000,
+			amplitude: 0.2
+	}
+}
+
+class NailsChatBot extends Component {
+
+  handleComplete(err, confirmation) {
+    if (err) {
+      alert('Bot conversation failed')
+      return;
+    }
+
+    alert('Success: ' + JSON.stringify(confirmation, null, 2));
+    return 'Happy to do you nails, thank you! what would you like to do next?';
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <header className="App-header">
+          <h1 className="App-title">Welcome to ChatBot Demo</h1>
+        </header>
+        <ChatBot
+          title="My Bot"
+          theme={myTheme}
+          botName="BookTrip_dev"
+          welcomeMessage="Welcome, how can I help you today?"
+          onComplete={this.handleComplete.bind(this)}
+          clearOnComplete={true}
+					conversationModeOn={false}
+					voiceEnabled={true}
+					voiceConfig={customVoiceConfig}
+        />
+      </div>
+    );
+  }
+}
 
 class App extends Component {
   render() {
@@ -458,6 +505,7 @@ class App extends Component {
             <Route path="/" exact component={NewAlbum}/>
             <Route path="/" exact component={AlbumsListLoader}/>
             <Route path="/" exact component={Search}/>
+						<Route path="/" exact component={NailsChatBot}/>
 
             <Route
               path="/albums/:albumId"
