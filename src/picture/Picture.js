@@ -8,7 +8,7 @@ export default class Picture extends Component {
     super(props);
     this.state = {
       status: false,
-      id: this.props.id
+			photoId: this.props.id
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handlePhotoClick.bind(this);
@@ -21,7 +21,7 @@ export default class Picture extends Component {
     this.props.handlePhotoClick(id);
   }
   handlePhotoClick(id) {
-    console.log("handlePhotoClick:::" + id);
+    console.log("Picture.js handlePhotoClick:::" + id + " Photo ID " + this.photoId);
     this.updateState(id);
     //this.setState(this.updateState(id));
   }

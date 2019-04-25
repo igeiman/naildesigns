@@ -9,17 +9,26 @@ type Album @model @auth(rules: [
     photos: [Photo] @connection(name: "AlbumPhotos")
 }
 
-type Photo @model @auth(rules: [{allow: owner}]) @searchable {
+type Photo @model @searchable {
     id: ID!
     album: Album @connection(name: "AlbumPhotos")
     bucket: String!
     fullsize: PhotoS3Info!
     thumbnail: PhotoS3Info!
     labels: [String!]
+	comments: [Comment] @connection(name: "CommentsPhoto")
+	score: Int
 }
 
 type PhotoS3Info {
     key: String!
     width: Int!
     height: Int!
+}
+
+type Comment @model @auth(rules: [{allow: owner}]) @searchable {
+	id: ID!
+	photo: Photo @connection(name: "CommentsPhoto")
+    text: String!
+    sentiment: String!
 }

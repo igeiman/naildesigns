@@ -34,11 +34,5 @@
 			"providerPlugin": "awscloudformation"
 		}
 	},
-	"interactions": {
-		"lexnails": {
-			"service": "Lex",
-			"providerPlugin": "awscloudformation",
-			"build": true
-		}
-	}
+	"interactions": {}
 }

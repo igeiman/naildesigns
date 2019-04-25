@@ -1,22 +1,49 @@
 import React, { Component } from "react";
 import { Form, TextArea, Label } from "semantic-ui-react";
 import { Space } from "aws-amplify-react/dist/AmplifyTheme";
+import Amplify, { API, graphqlOperation, Storage } from "aws-amplify";
+
+
+ const UpdatePhoto = `mutation UpdatePhoto($id: ID!, $score: Int) {
+	updatePhoto(input:{id: $id, score: $score}){
+  	id
+    score
+	}
+}`
+
+const GetPhoto = `query GetPhoto($id: ID!) {
+	getPhoto(id: $id){
+  	id
+    score
+	}
+}`
 
 class Counter extends Component {
-  state = {
-    count: 0,
-    textareaValue: "",
-    images: ["image1", "image2", "image3"]
-  };
+	constructor(props) {
+    super(props);
+    this.state = {
+			count: 0,
+			albumName: "",
+			textareaValue: ""
+		};
+
+  }
+
   styles = {
     fontSize: 20,
     fontWeight: "bold"
   };
 
-  handleIncrement = product => {
-    console.log("Increment Clicked", this);
-    console.log("Increment Clicked", this);
-    this.setState({ count: this.state.count + 1 });
+  handleIncrement = async _product => {
+		const result  = await API.graphql(
+      graphqlOperation(UpdatePhoto, {
+        id: this.props.photoId,
+        score: this.state.count + 1
+      })
+		);
+		this.setState({ count: result.data.updatePhoto.score });
+		console.log("Increment Clicked", this);
+		console.log("After update the score in DB" + result.data.updatePhoto.score);
   };
   handleOnChange(event) {
     this.setState({
@@ -33,8 +60,19 @@ class Counter extends Component {
           ))}
         </ul>
       );
-  }
+	}
+
+	async getScore(){
+		const result  = await API.graphql(
+      graphqlOperation(GetPhoto, {
+        id: this.props.photoId
+      })
+		);
+		console.log("Getting the latest score ", result)
+		this.setState({ count: result.data.getPhoto.score });
+	}
   render() {
+		this.state.count === 0? this.getScore(): void 0;
     return (
       <React.Fragment>
         <Form>

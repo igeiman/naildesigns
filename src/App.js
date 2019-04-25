@@ -42,13 +42,22 @@ function makeComparator(key, order = "asc") {
   };
 }
 
+const CreateComment = `mutation CreateComment($text:String!, $sentiment: String!, photoID: String!){
+	 createComment(input:{text: $text, sentiment: $sentiment, commentPhotoId: $photoId})
+  {
+    id
+    sentiment
+  }
+}`
+
+
 const ListAlbums = `query ListAlbums {
-    listAlbums(limit: 9999) {
-        items {
-            id
-            name
-        }
-    }
+	listAlbums(limit: 9999) {
+			items {
+					id
+					name
+			}
+	}
 }`;
 
 const SubscribeToNewAlbums = `
@@ -65,8 +74,10 @@ const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
     id
     name
     photos(sortDirection: DESC, nextToken: $nextTokenForPhotos) {
-      nextToken
+			nextToken
       items {
+				id
+				score
         thumbnail {
           width
           height
@@ -102,6 +113,7 @@ const SearchPhotos = `query SearchPhotos($label: String!) {
   }
 }`;
 
+// Photoid:45b85edd-7420-4ab1-9135-7172770fee1c
 class Search extends React.Component {
   constructor(props) {
     super(props);
@@ -118,7 +130,7 @@ class Search extends React.Component {
     this.setState({ label: e.target.value, searched: false });
   };
 
-  getPhotosForLabel = async e => {
+  getPhotosForLabel = async () => {
     const result = await API.graphql(
       graphqlOperation(SearchPhotos, { label: this.state.label })
     );
@@ -249,26 +261,26 @@ class PhotosList extends React.Component {
     // selectedPhoto: id
     //});
   }
-  handlePhotoClickOld(id) {
-    console.log("handlePhotoClick photoClick: " + id);
-    let ObjNum = this.props.photos.find(photo => photo.thumbnail.key === id);
-    let items = this.props.photos;
-    //{
-    //items.map(photo => console.log(id + "VALUE::" + photo.thumbnail.key));
-    //}
-    // console.log("handlePhotoClick photoClick: " + photo.thumbnail.key);
-    //photo.thumbnail.key = "public/" + photo.thumbnail.key;
-    //return photo;
-    // }
-    //});
+  // handlePhotoClickOld(id) {
+  //   console.log("handlePhotoClick photoClick: " + id);
+  //   let ObjNum = this.props.photos.find(photo => photo.thumbnail.key === id);
+  //   //{
+  //   //items.map(photo => console.log(id + "VALUE::" + photo.thumbnail.key));
+  //   //}
+  //   // console.log("handlePhotoClick photoClick: " + photo.thumbnail.key);
+  //   //photo.thumbnail.key = "public/" + photo.thumbnail.key;
+  //   //return photo;
+  //   // }
+  //   //});
 
-    this.setState({
-      selectedPhoto: ObjNum
-    });
-    console.log("SELECTEDkkkk::" + this.state.selectedPhoto);
-  }
+  //   this.setState({
+  //     selectedPhoto: ObjNum
+  //   });
+  //   console.log("SELECTEDkkkk::" + this.state.selectedPhoto);
+  // }
 
   handleLightboxClose = () => {
+		console.log("Closing the picture with handleLightboxClose " + this.state.selectedPhoto.id)
     this.setState({
       selectedPhoto: null
     });
@@ -282,7 +294,7 @@ class PhotosList extends React.Component {
   };
 
   handleCounter(_State) {
-    console.log("handel counter:" + _State);
+    console.log("handle counter:" + _State);
     //const ObjNum = this.state.selectedPhoto.findIndex(
     //   _book => _book.isbn === _State.id
     // );
@@ -298,7 +310,8 @@ class PhotosList extends React.Component {
             cover={photo.thumbnail.key.replace("public/", "")}
             size={photo.fullsize}
             author="Author"
-            name="Name"
+						name="Name"
+						id={photo.id}
           />
         ))}
       </div>
@@ -389,7 +402,7 @@ class Lightbox extends Component {
                   }}
                   onClick={this.props.onClose}
                 />
-                <Counter />
+                <Counter photoId={this.props.photo.id} />
               </div>
             ) : null}
           </Container>
@@ -399,30 +412,6 @@ class Lightbox extends Component {
   }
 }
 
-class LightboxRita extends Component {
-  render() {
-    return (
-      <Modal open={this.props.photo !== null} onClose={this.props.onClose}>
-        <Modal.Content>
-          <Container textAlign="center">
-            {this.props.photo ? (
-              <div>
-                <S3Image
-                  imgKey={this.props.photo.key.replace("public/", "")}
-                  theme={{
-                    photoImg: { maxWidth: "50%", height: "50%", width: "50%" }
-                  }}
-                  onClick={this.props.onClose}
-                />
-                <Counter />
-              </div>
-            ) : null}
-          </Container>
-        </Modal.Content>
-      </Modal>
-    );
-  }
-}
 class AlbumsList extends React.Component {
   albumItems() {
     return this.props.albums.sort(makeComparator("name")).map(album => (
@@ -481,7 +470,8 @@ class AlbumDetailsLoader extends React.Component {
       loading: false,
       nextTokenForPhotos: data.getAlbum.photos.nextToken,
       hasMorePhotos: data.getAlbum.photos.nextToken !== null
-    });
+		});
+		console.log("PhotosLoader" + JSON.stringify(album));
   }
 
   componentDidMount() {
