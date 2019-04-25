@@ -30,5 +30,5 @@ type Comment @model @auth(rules: [{allow: owner}]) @searchable {
 	id: ID!
 	photo: Photo @connection(name: "CommentsPhoto")
     text: String!
-    sentiment: String!
+    sentiment: String
 }

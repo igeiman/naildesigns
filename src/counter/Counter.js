@@ -18,13 +18,20 @@ const GetPhoto = `query GetPhoto($id: ID!) {
 	}
 }`
 
+const CreateComment = `mutation CreateComment($text: String!, $commentPhotoId: ID!) {
+	createComment(input:{text: $text, commentPhotoId: $commentPhotoId}){
+  	id
+    text
+	}
+}`
+
 class Counter extends Component {
 	constructor(props) {
     super(props);
     this.state = {
 			count: 0,
 			albumName: "",
-			textareaValue: ""
+			textAreaValue: ""
 		};
 
   }
@@ -47,7 +54,7 @@ class Counter extends Component {
   };
   handleOnChange(event) {
     this.setState({
-      textareaValue: event.target.value
+      textAreaValue: event.target.value
     });
   }
   renderImages() {
@@ -71,6 +78,18 @@ class Counter extends Component {
 		console.log("Getting the latest score ", result)
 		this.setState({ count: result.data.getPhoto.score });
 	}
+
+	async componentWillUnmount()
+	{
+		const result  = await API.graphql(
+      graphqlOperation(CreateComment, {
+        text: this.state.textAreaValue, commentPhotoId: this.props.photoId
+      })
+		);
+		console.log("That's what we have in the comments ", this.state.textAreaValue)
+		console.log("Result is ", result)
+	}
+
   render() {
 		this.state.count === 0? this.getScore(): void 0;
     return (
@@ -81,7 +100,7 @@ class Counter extends Component {
           <TextArea
             placeholder="Comments"
             style={{ minHeight: 100, width: 350 }}
-            value={this.state.textareaValue}
+            value={this.state.textAreaValue}
             onChange={event => this.handleOnChange(event)}
           />
         </Form>
