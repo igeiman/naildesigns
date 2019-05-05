@@ -8,7 +8,7 @@ export default class Picture extends Component {
     super(props);
     this.state = {
       status: false,
-			photoId: this.props.id
+      photoId: this.props.id
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handlePhotoClick.bind(this);
@@ -21,7 +21,9 @@ export default class Picture extends Component {
     this.props.handlePhotoClick(id);
   }
   handlePhotoClick(id) {
-    console.log("Picture.js handlePhotoClick:::" + id + " Photo ID " + this.photoId);
+    console.log(
+      "Picture.js handlePhotoClick:::" + id + " Photo ID " + this.photoId
+    );
     this.updateState(id);
     //this.setState(this.updateState(id));
   }
@@ -46,7 +48,7 @@ export default class Picture extends Component {
           alt="Nail sample i3"
           imgKey={this.props.cover}
           onClick={() => this.handleClick(this.props.cover)}
-          style={{ width: 230 + "px", height: 325 + "px" }}
+          style={{ width: 130 + "px", height: 175 + "px" }}
         />
 
         <Card.Content>
