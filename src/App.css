@@ -34,6 +34,11 @@
 
 img {
   border-style: none;
-  width: 130px !important;
-  height: 160px !important;
+  width: 100% !important;
+  height: 100% !important;
+  resize: both;
+}
+.resizeImg {
+  height: "400px !important";
+  width: "500px !important";
 }
