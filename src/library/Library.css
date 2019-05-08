@@ -12,7 +12,8 @@
 .flex-row-container > .card {
   margin-top: 14px !important;
   margin-bottom: 14px !important;
-  width: 330px !important;
+  width: 230px !important;
+  height: 300px !important;
 }
 
 .flex-row-container {
@@ -34,4 +35,13 @@
   background-color: #fff4e6;
   border: 1px solid #f76707;
   /* text-align: center; */
+}
+
+.ui .card {
+  align-items: center;
+  justify-content: center;
+  -ms-align-items: center;
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
 }
