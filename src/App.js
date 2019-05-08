@@ -590,7 +590,7 @@ class AlbumsListLoader extends React.Component {
       >
         {({ data, loading }) => {
           if (loading) {
-            return <div>Loading...</div>;
+            return <div>Loading Now...</div>;
           }
           if (!data.listAlbums) return;
 

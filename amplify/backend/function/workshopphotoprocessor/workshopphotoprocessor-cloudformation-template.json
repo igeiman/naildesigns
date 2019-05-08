@@ -33,6 +33,8 @@
 						},
 						"THUMBNAIL_WIDTH": "80",
 						"THUMBNAIL_HEIGHT": "80",
+						"EMAILS_LIST": "irkin13@gmail.com",
+						"SOURCE_EMAIL": "irkin13@gmail.com",
 						"DYNAMODB_PHOTOS_TABLE_ARN": {
 							"Ref": "DynamoDBPhotosTableArn"
 						}
@@ -40,7 +42,7 @@
 				},
 				"Code": {
 					"S3Bucket": "nail-designs-20190414134207-deployment",
-					"S3Key": "amplify-builds/workshopphotoprocessor-1556062080-latest-build.zip"
+					"S3Key": "amplify-builds/workshopphotoprocessor-1557289277-latest-build.zip"
 				}
 			}
 		},
@@ -104,6 +106,21 @@
 									}
 								]
 							}
+						},
+						{
+							"Effect": "Allow",
+							"Action": [
+								"rekognition:DetectLabels",
+								"rekognition:DetectModerationLabels"
+							],
+							"Resource": "*"
+						},
+						{
+							"Effect": "Allow",
+							"Action": [
+								"ses:SendEmail"
+							],
+							"Resource": "*"
 						}
 					]
 				}
