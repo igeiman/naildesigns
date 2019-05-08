@@ -3,6 +3,7 @@
 import React, { Component } from "react";
 import Counter from "./counter/Counter";
 import Picture from "./picture/Picture";
+
 import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import "./App.css";
 import "./library/Library.css";
@@ -15,6 +16,7 @@ import {
   Input,
   List,
   Modal,
+  Image,
   Segment,
   Label
 } from "semantic-ui-react";
@@ -48,8 +50,7 @@ const CreateComment = `mutation CreateComment($text:String!, $sentiment: String!
     id
     sentiment
   }
-}`
-
+}`;
 
 const ListAlbums = `query ListAlbums {
 	listAlbums(limit: 9999) {
@@ -182,7 +183,7 @@ class Search extends React.Component {
 class S3ImageUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { uploading: false };
+    this.state = { file: "", imagePreviewUrl: "", uploading: false };
   }
 
   uploadFile = async file => {
@@ -207,10 +208,56 @@ class S3ImageUpload extends React.Component {
 
     this.setState({ uploading: false });
   };
+  _handleSubmit(e) {
+    e.preventDefault();
+    // TODO: do something with -> this.state.file
+    console.log("handle uploading-" + this.gestate.imagePreviewUrl);
+  }
+  _handleImageChange(e) {
+    e.preventDefault();
 
+    let reader = new FileReader();
+    let file = e.target.files[0];
+
+    reader.onloadend = () => {
+      this.setState({
+        file: file,
+        imagePreviewUrl: reader.result
+      });
+    };
+
+    reader.readAsDataURL(file);
+  }
   render() {
+    let { imagePreviewUrl } = this.state;
+    let $imagePreview = null;
+    if (imagePreviewUrl) {
+      $imagePreview = <img src={imagePreviewUrl} />;
+    } else {
+      $imagePreview = (
+        <div className="previewText">Please select an Image for Preview</div>
+      );
+    }
+
     return (
       <div>
+        <div className="previewComponent">
+          <form onSubmit={e => this._handleSubmit(e)}>
+            <input
+              className="fileInput"
+              type="file"
+              onChange={e => this._handleImageChange(e)}
+            />
+            <button
+              className="submitButton"
+              type="submit"
+              onClick={this._handleSubmit}
+            >
+              Upload Image
+            </button>
+          </form>
+          <div className="imgPreview">{$imagePreview}</div>
+        </div>
         <Form.Button
           onClick={() =>
             document.getElementById("add-image-file-input").click()
@@ -280,7 +327,10 @@ class PhotosList extends React.Component {
   // }
 
   handleLightboxClose = () => {
-		console.log("Closing the picture with handleLightboxClose " + this.state.selectedPhoto.id)
+    console.log(
+      "Closing the picture with handleLightboxClose " +
+        this.state.selectedPhoto.id
+    );
     this.setState({
       selectedPhoto: null
     });
@@ -310,8 +360,8 @@ class PhotosList extends React.Component {
             cover={photo.thumbnail.key.replace("public/", "")}
             size={photo.fullsize}
             author="Author"
-						name="Name"
-						id={photo.id}
+            name="Name"
+            id={photo.id}
           />
         ))}
       </div>
@@ -391,13 +441,19 @@ class Lightbox extends Component {
             {this.props.photo ? (
               <div>
                 <Label>Hello</Label>
+                
                 <S3Image
-                  imgKey={this.props.photo.thumbnail.key.replace("public/", "")}
+                  className="resizeImg"
+                  imgKey={this.props.photo.fullsize.key.replace("public/", "")}
+                  style={{
+                    width: "500px !important",
+                    height: "400px !important"
+                  }}
                   theme={{
                     photoImg: {
                       maxWidth: "500px",
-                      height: "400px",
-                      width: "500px"
+                      height: "400px !important",
+                      width: "500px !important"
                     }
                   }}
                   onClick={this.props.onClose}
@@ -470,8 +526,8 @@ class AlbumDetailsLoader extends React.Component {
       loading: false,
       nextTokenForPhotos: data.getAlbum.photos.nextToken,
       hasMorePhotos: data.getAlbum.photos.nextToken !== null
-		});
-		console.log("PhotosLoader" + JSON.stringify(album));
+    });
+    console.log("PhotosLoader" + JSON.stringify(album));
   }
 
   componentDidMount() {
