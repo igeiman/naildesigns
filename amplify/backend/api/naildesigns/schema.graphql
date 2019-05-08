@@ -32,3 +32,16 @@ type Comment @model @auth(rules: [{allow: owner}]) @searchable {
     text: String!
     sentiment: String
 }
+
+type Subscription {
+    upload(id: String!): Label
+    @aws_subscribe(mutations: ["labeled"])
+}
+
+type Mutation {
+    labeled( photoid: String!): Label!
+}
+
+type Label {
+    label: String!
+}

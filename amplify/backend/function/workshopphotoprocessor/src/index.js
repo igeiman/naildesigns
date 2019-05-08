@@ -32,9 +32,31 @@ async function getLabelNames(bucketName, key) {
     MaxLabels: 50,
     MinConfidence: 70
   };
+
   const detectionResult = await Rekognition.detectLabels(params).promise();
   const labelNames = detectionResult.Labels.map((l) => l.Name.toLowerCase());
   return labelNames;
+}
+
+async function detectExplicitConetnt(bucketName, key) {
+let detectParams = {
+	Image: {
+		S3Object: {
+		Bucket: bucketName,
+		Name: key
+		}
+	},
+	MinConfidence: 70
+	};
+	const explicitContent = await Rekognition.detectModerationLabels(detectParams).promise();
+	console.log("Explicit content call processed: " + JSON.stringify(explicitContent));
+	if (explicitContent.ModerationLabels.length) {
+		console.log("Explicit content detected", explicitContent.ModerationLabels.map((l) => l.Name.toLowerCase()));
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 function storePhotoInfo(item) {
@@ -112,7 +134,16 @@ async function processRecord(record) {
     if (key.indexOf('uploads') != 0) return;
 
     const metadata = await getMetadata(bucketName, key);
-    const sizes = await resize(bucketName, key);
+	const sizes = await resize(bucketName, key);
+	const explicitContent = await detectExplicitConetnt(bucketName, sizes.fullsize.key);
+
+	// We will not store or process explicit content so it will never show in the albums
+	if (explicitContent) {
+		console.log("Moderated image - not processing!")
+		// post message to SNS topic
+		return;
+	}
+
     const labelNames = await getLabelNames(bucketName, sizes.fullsize.key);
     const id = uuidv4();
     const item = {
