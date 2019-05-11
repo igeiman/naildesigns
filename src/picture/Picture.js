@@ -4,6 +4,8 @@ import Counter from "../counter/Counter";
 import { Card, Icon, Image } from "semantic-ui-react";
 import { Connect, S3Image, withAuthenticator } from "aws-amplify-react";
 import "semantic-ui-css/semantic.min.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import Amplify, { API, graphqlOperation, Storage } from "aws-amplify";
 import "../picture/Picture.css";
 
@@ -93,6 +95,12 @@ export default class Picture extends Component {
     this.state.count === 0 ? this.getScore() : void 0;
     return (
       <Card>
+        <div
+          onClick={() => this.props.removeImage(this.props.id)}
+          className="delete"
+        >
+          <FontAwesomeIcon icon={faTimesCircle} size="2x" />
+        </div>
         <S3Image
           key={this.props.key}
           alt="Nail sample i3"
