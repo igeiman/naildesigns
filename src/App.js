@@ -52,6 +52,14 @@ const CreateComment = `mutation CreateComment($text:String!, $sentiment: String!
   }
 }`;
 
+const DeletePhoto = `mutation DeletePhoto($id: ID!){
+  deletePhoto(input:{id: $id})
+ {
+   id
+
+ }
+}`;
+
 const ListAlbums = `query ListAlbums {
 	listAlbums(limit: 9999) {
 			items {
@@ -260,8 +268,28 @@ class PhotosList extends React.Component {
     };
     this.photoClick = this.photoClick.bind(this);
     this.handlePhotoClick = this.handlePhotoClick.bind(this);
+    this.removeImage = this.removeImage.bind(this);
   }
 
+  async removeImage(id, props) {
+    const result = await API.graphql(
+      graphqlOperation(DeletePhoto, {
+        id: id
+      })
+    );
+  }
+  removeImageOld = id => {
+    this.setState({});
+  };
+  /*
+   deletePlayer = id => {
+    this.setState({
+      teamPlayers: this.state.teamPlayers.filter(
+        player => player.idTeam !== id,
+      ),
+    });
+  };
+  */
   handlePhotoClick(id) {
     let items = this.props.photos;
     console.log("photoClick photoClick:SIZE" + items.map.size);
@@ -334,6 +362,7 @@ class PhotosList extends React.Component {
             size={photo.fullsize}
             author="Author"
             name="Name"
+            removeImage={this.removeImage}
             id={photo.id}
           />
         ))}
