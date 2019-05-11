@@ -24,7 +24,7 @@ const CreateComment = `mutation CreateComment($text: String!, $commentPhotoId: I
 	}
 }`;
 
-class Counter extends Component {
+class Survey extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -68,6 +68,7 @@ class Counter extends Component {
   }
 
   async getScore() {
+    console.log("Getting the sdfdsf sflatest score ");
     const result = await API.graphql(
       graphqlOperation(GetPhoto, {
         id: this.props.photoId
@@ -96,14 +97,15 @@ class Counter extends Component {
     return (
       <React.Fragment>
         <Form>
-          <Label>Tell us more</Label>
-          <br />
-          <TextArea
-            placeholder="Comments"
-            style={{ minHeight: 100, width: 350 }}
-            value={this.state.textAreaValue}
-            onChange={event => this.handleOnChange(event)}
-          />
+          <span style={this.styles} className={this.getBadgeClasses()}>
+            {this.formatCount()}
+          </span>
+          <button
+            onClick={() => this.handleIncrement({})}
+            className="btn btn-secondary btn-sm"
+          >
+            Increment
+          </button>
         </Form>
       </React.Fragment>
     );
@@ -120,4 +122,4 @@ class Counter extends Component {
   }
 }
 
-export default Counter;
+export default Survey;
