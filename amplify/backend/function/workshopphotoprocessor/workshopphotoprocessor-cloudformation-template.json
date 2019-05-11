@@ -42,7 +42,7 @@
 				},
 				"Code": {
 					"S3Bucket": "nail-designs-20190414134207-deployment",
-					"S3Key": "amplify-builds/workshopphotoprocessor-1557289277-latest-build.zip"
+					"S3Key": "amplify-builds/workshopphotoprocessor-1557319885-latest-build.zip"
 				}
 			}
 		},
