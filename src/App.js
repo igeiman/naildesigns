@@ -1,6 +1,7 @@
 // src/App.js
 
 import React, { Component } from "react";
+import Survey from "./counter/Survey";
 import Counter from "./counter/Counter";
 import Picture from "./picture/Picture";
 
@@ -229,35 +230,8 @@ class S3ImageUpload extends React.Component {
     reader.readAsDataURL(file);
   }
   render() {
-    let { imagePreviewUrl } = this.state;
-    let $imagePreview = null;
-    if (imagePreviewUrl) {
-      $imagePreview = <img src={imagePreviewUrl} />;
-    } else {
-      $imagePreview = (
-        <div className="previewText">Please select an Image for Preview</div>
-      );
-    }
-
     return (
       <div>
-        <div className="previewComponent">
-          <form onSubmit={e => this._handleSubmit(e)}>
-            <input
-              className="fileInput"
-              type="file"
-              onChange={e => this._handleImageChange(e)}
-            />
-            <button
-              className="submitButton"
-              type="submit"
-              onClick={this._handleSubmit}
-            >
-              Upload Image
-            </button>
-          </form>
-          <div className="imgPreview">{$imagePreview}</div>
-        </div>
         <Form.Button
           onClick={() =>
             document.getElementById("add-image-file-input").click()
@@ -441,7 +415,7 @@ class Lightbox extends Component {
             {this.props.photo ? (
               <div>
                 <Label>Hello</Label>
-                
+
                 <S3Image
                   className="resizeImg"
                   imgKey={this.props.photo.fullsize.key.replace("public/", "")}
