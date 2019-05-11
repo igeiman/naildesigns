@@ -1,7 +1,7 @@
 // src/App.js
 
 import React, { Component } from "react";
-import Survey from "./counter/Survey";
+
 import Counter from "./counter/Counter";
 import Picture from "./picture/Picture";
 
