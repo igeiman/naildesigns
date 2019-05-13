@@ -1,7 +1,7 @@
 .count {
   position: relative;
-  margin: 40px 0;
-  padding: 14px 16px;
+  margin: 10px 0;
+  padding: 24px 16px;
   font-size: 40px;
   line-height: 40px;
   font-weight: 600;
@@ -10,4 +10,8 @@
   border-radius: (4px);
   display: inline-block;
   background: rgba(255, 255, 255, 0.1);
+}
+.fa-2x {
+  font-size: 1.1em;
+  margin-right: 220px;
 }
