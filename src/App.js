@@ -69,6 +69,13 @@ const ListAlbums = `query ListAlbums {
 			}
 	}
 }`;
+const SubscribeToDeletePhoto = `
+subscription OnDeletePhoto {
+  onDeletePhoto {
+    id    
+  }
+}
+`;
 
 const SubscribeToNewAlbums = `
   subscription OnCreateAlbum {
@@ -272,12 +279,15 @@ class PhotosList extends React.Component {
     this.removeImage = this.removeImage.bind(this);
   }
 
-  async removeImage(id, props) {
+  async removeImage(id) {
     const result = await API.graphql(
       graphqlOperation(DeletePhoto, {
         id: id
       })
     );
+    // this
+    let items = this.props.photos;
+    console.log("REMOVE IMAGE::" + id + items.size);
   }
   removeImageOld = id => {
     this.setState({});
@@ -377,6 +387,7 @@ class PhotosList extends React.Component {
         <Divider hidden />
 
         {this.photoItems()}
+
         <Lightbox
           photo={this.state.selectedPhoto}
           onClose={this.handleLightboxClose}
