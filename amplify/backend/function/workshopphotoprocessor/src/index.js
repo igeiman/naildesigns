@@ -3,7 +3,6 @@
 const AWS = require('aws-sdk');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
 const Rekognition = new AWS.Rekognition();
-const SES = new AWS.SES()
 const SNS = new AWS.SNS({apiVersion: '2010-03-31'})
 const DynamoDBDocClient = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 const uuidv4 = require('uuid/v4');
@@ -22,8 +21,6 @@ const Sharp = require('sharp');
 const THUMBNAIL_WIDTH = parseInt(process.env.THUMBNAIL_WIDTH, 10);
 const THUMBNAIL_HEIGHT = parseInt(process.env.THUMBNAIL_HEIGHT, 10);
 const DYNAMODB_PHOTOS_TABLE_NAME = process.env.DYNAMODB_PHOTOS_TABLE_ARN.split('/')[1];
-const EMAILS_LIST = process.env.EMAILS_LIST.split(" ");
-const SOURCE_EMAIL = process.env.SOURCE_EMAIL;
 const TOPIC_ARN = "arn:aws:sns:us-east-1:357527257673:moderation";
 
 async function getLabelNames(bucketName, key) {
@@ -133,32 +130,6 @@ async function resize(bucketName, key) {
 };
 
 async function sendEmail(metadata) {
-	// console.log("Sending emails to ", EMAILS_LIST);
-	// const emailParams = {
-	// 	Source: SOURCE_EMAIL,
-	// 	Destination: { ToAddresses: EMAILS_LIST },
-	// 	Message: {
-	// 	  Body: {
-	// 		Text: {
-	// 		  Charset: 'UTF-8',
-	// 		  Data: `The owner ${metadata.owner} of album ${metadata.albumid} attempted moderated content upload`
-	// 		}
-	// 	  },
-	// 	  Subject: {
-	// 		Charset: 'UTF-8',
-	// 		Data: `User ${metadata.owner} attempted upload of moderated content!`
-	// 	  }
-	// 	}
-	//   }
-
-	// Can not receive SES messages
-    // console.log("Sending this ", JSON.stringify(emailParams))
-	//   try {
-	// 	const data = await SES.sendEmail(emailParams).promise()
-	// 	return console.log("Email sent ", data)
-	//   } catch (err) {
-	// 	return console.error("Email failed ", err)
-	//   }
 
 // Create publish parameters
   var params = {
