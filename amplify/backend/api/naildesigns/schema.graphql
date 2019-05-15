@@ -1,9 +1,11 @@
 # amplify/backend/api/photo-albums/schema.graphql
 
-type Album @model @auth(rules: [
-	{allow: owner}
-	{ allow: owner, ownerField: "members", queries: [get, list], mutations: null }
-	]) {
+# type Album @model @auth(rules: [
+# 	{allow: owner}
+# 	{ allow: owner, ownerField: "members", queries: [get, list], mutations: null }
+#	])
+
+type Album @model {
     id: ID!
     name: String!
     photos: [Photo] @connection(name: "AlbumPhotos")
@@ -26,7 +28,7 @@ type PhotoS3Info {
     height: Int!
 }
 
-type Comment @model @auth(rules: [{allow: owner}]) @searchable {
+type Comment @model  @searchable {
 	id: ID!
 	photo: Photo @connection(name: "CommentsPhoto")
     text: String!
