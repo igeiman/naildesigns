@@ -45,7 +45,7 @@ function makeComparator(key, order = "asc") {
 }
 
 const CreateComment = `mutation CreateComment($text:String!, $sentiment: String!, photoID: String!){
-	 createComment(input:{text: $text, sentiment: $sentiment, commentPhotoId: $photoId})
+   createComment(input:{text: $text, sentiment: $sentiment, commentPhotoId: $photoId})
   {
     id
     sentiment
@@ -61,17 +61,17 @@ const DeletePhoto = `mutation DeletePhoto($id: ID!){
 }`;
 
 const ListAlbums = `query ListAlbums {
-	listAlbums(limit: 9999) {
-			items {
-					id
-					name
-			}
-	}
+  listAlbums(limit: 9999) {
+      items {
+          id
+          name
+      }
+  }
 }`;
 const SubscribeToDeletePhoto = `
 subscription OnDeletePhoto {
   onDeletePhoto {
-    id    
+    id
   }
 }
 `;
@@ -90,20 +90,20 @@ const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
     id
     name
     photos(sortDirection: DESC, nextToken: $nextTokenForPhotos) {
-			nextToken
+      nextToken
       items {
-				id
-				score
+        id
+        score
         thumbnail {
           width
           height
           key
-				}
-				fullsize {
-					width
-					height
-					key
-				}
+        }
+        fullsize {
+          width
+          height
+          key
+        }
       }
     }
   }
@@ -514,6 +514,19 @@ class AlbumDetailsLoader extends React.Component {
     };
   }
 
+  onDeletePhoto = (prevQuery, newData) => {
+    // When we get notified about the delete we need to update the state
+    // and remove the deleted photo from the list of photos
+    console.log("The deleted photo list is ", JSON.stringify(newData))
+    console.log("Current list in the state is ",JSON.stringify(this.state.album.photos.items) )
+
+    var index = this.state.album.photos.items.findIndex(element => element.id === newData.onDeletePhoto.id)
+    console.log("Found deleted index ", index)
+    if (typeof index == 'undefined') return;
+    this.state.album.photos.items.splice(index,1)
+    console.log("After splice the list in the state is ",JSON.stringify(this.state.album.photos.items) )
+  };
+
   async loadMorePhotos() {
     if (!this.state.hasMorePhotos) return;
 
@@ -549,12 +562,23 @@ class AlbumDetailsLoader extends React.Component {
 
   render() {
     return (
-      <AlbumDetails
-        loadingPhotos={this.state.loading}
-        album={this.state.album}
-        loadMorePhotos={this.loadMorePhotos.bind(this)}
-        hasMorePhotos={this.state.hasMorePhotos}
-      />
+      <Segment>
+      <Connect
+        query={graphqlOperation(GetAlbum)}
+        subscription={graphqlOperation(SubscribeToDeletePhoto)}
+        onSubscriptionMsg={this.onDeletePhoto}
+      >
+        {({ data }) => {
+          console.log("In connect , the data is ", JSON.stringify(data))
+          return <AlbumDetails
+            loadingPhotos={this.state.loading}
+            album={this.state.album}
+            loadMorePhotos={this.loadMorePhotos.bind(this)}
+            hasMorePhotos={this.state.hasMorePhotos}
+          />
+        }}
+      </Connect>
+      </Segment>
     );
   }
 }
