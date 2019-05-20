@@ -5,6 +5,8 @@
 # 	{ allow: owner, ownerField: "members", queries: [get, list], mutations: null }
 #	])
 
+
+
 type Album @model {
     id: ID!
     name: String!
@@ -37,13 +39,17 @@ type Comment @model  @searchable {
 
 type Subscription {
     upload(id: String!): Label
-    @aws_subscribe(mutations: ["labeled"])
+    	@aws_subscribe(mutations: ["labeled"])
+	onPhotoUploadDelete: Photo
+		@aws_subscribe(mutations: ["uploadPhoto","deletePhoto"])
 }
 
 type Mutation {
     labeled( photoid: String!): Label!
+	uploadPhoto(albumId: ID!, action: String): Photo
 }
 
 type Label {
     label: String!
 }
+

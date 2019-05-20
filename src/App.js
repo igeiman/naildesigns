@@ -44,11 +44,13 @@ function makeComparator(key, order = "asc") {
   };
 }
 
-const CreateComment = `mutation CreateComment($text:String!, $sentiment: String!, photoID: String!){
-   createComment(input:{text: $text, sentiment: $sentiment, commentPhotoId: $photoId})
-  {
+const UploadPhoto = `
+mutation UploadPhoto($albumId:ID!, $action: String)
+{
+	uploadPhoto(albumId: $albumId, action: $action)
+	{
     id
-    sentiment
+    bucket
   }
 }`;
 
@@ -56,9 +58,10 @@ const DeletePhoto = `mutation DeletePhoto($id: ID!){
   deletePhoto(input:{id: $id})
  {
    id
-
+   bucket
  }
 }`;
+
 
 const ListAlbums = `query ListAlbums {
   listAlbums(limit: 9999) {
@@ -68,10 +71,13 @@ const ListAlbums = `query ListAlbums {
       }
   }
 }`;
-const SubscribeToDeletePhoto = `
-subscription OnDeletePhoto {
-  onDeletePhoto {
+
+
+const SubscribeToUploadDeletePhoto = `
+subscription OnPhotoUploadDelete{
+  onPhotoUploadDelete{
     id
+    bucket
   }
 }
 `;
@@ -84,6 +90,7 @@ const SubscribeToNewAlbums = `
     }
   }
 `;
+
 
 const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
     getAlbum(id: $id) {
@@ -206,10 +213,16 @@ class S3ImageUpload extends React.Component {
 
     const result = await Storage.put(fileName, file, {
       customPrefix: { public: "uploads/" },
-      metadata: { albumid: this.props.albumId }
-    });
+			metadata: { albumid: this.props.albumId }
+		}
+		);
+		console.log("Triggering mutation for photo ", fileName);
+		await API.graphql(
+				graphqlOperation(UploadPhoto, {
+					albumId: this.props.albumId, action:"PhotoUploaded"
+				})
+			);
 
-    console.log("Uploaded file: ", result);
   };
 
   onChange = async e => {
@@ -291,15 +304,7 @@ class PhotosList extends React.Component {
   removeImageOld = id => {
     this.setState({});
   };
-  /*
-   deletePlayer = id => {
-    this.setState({
-      teamPlayers: this.state.teamPlayers.filter(
-        player => player.idTeam !== id,
-      ),
-    });
-  };
-  */
+
   handlePhotoClick(id) {
     let items = this.props.photos;
     console.log("photoClick photoClick:SIZE" + items.map.size);
@@ -315,27 +320,7 @@ class PhotosList extends React.Component {
               (photo.thumbnail.key === id)
           )
     );
-    //this.setState({
-    // selectedPhoto: id
-    //});
   }
-  // handlePhotoClickOld(id) {
-  //   console.log("handlePhotoClick photoClick: " + id);
-  //   let ObjNum = this.props.photos.find(photo => photo.thumbnail.key === id);
-  //   //{
-  //   //items.map(photo => console.log(id + "VALUE::" + photo.thumbnail.key));
-  //   //}
-  //   // console.log("handlePhotoClick photoClick: " + photo.thumbnail.key);
-  //   //photo.thumbnail.key = "public/" + photo.thumbnail.key;
-  //   //return photo;
-  //   // }
-  //   //});
-
-  //   this.setState({
-  //     selectedPhoto: ObjNum
-  //   });
-  //   console.log("SELECTEDkkkk::" + this.state.selectedPhoto);
-  // }
 
   handleLightboxClose = () => {
     console.log(
@@ -514,21 +499,27 @@ class AlbumDetailsLoader extends React.Component {
     };
   }
 
-  onDeletePhoto = (prevQuery, newData) => {
+  onCreateOrDeletePhoto = async (prevQuery, newData) => {
     // When we get notified about the delete we need to update the state
-    // and remove the deleted photo from the list of photos
-    console.log("The deleted photo list is ", JSON.stringify(newData))
-    console.log("Current list in the state is ",JSON.stringify(this.state.album.photos.items) )
+		// and remove the deleted photo from the list of photos
+		const sleep = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000))
+		if (newData.onPhotoUploadDelete.bucket === "PhotoUploaded" && this.state.album.id === newData.onPhotoUploadDelete.id){
+			console.log("CONGRATS! There was an upload for album: ",newData.onPhotoUploadDelete.id,"Current album: ", this.state.album.id );
 
-    var index = this.state.album.photos.items.findIndex(element => element.id === newData.onDeletePhoto.id)
-    console.log("Found deleted index ", index)
-    if (typeof index == 'undefined') return;
-    this.state.album.photos.items.splice(index,1)
-    console.log("After splice the list in the state is ",JSON.stringify(this.state.album.photos.items) )
+			await sleep(8);
+			this.state.hasMorePhotos = true
+		  this.state.nextTokenForPhotos = null
+		  this.state.album = null
+		  this.loadMorePhotos()
+			return;
+		}
+		var index = this.state.album.photos.items.findIndex(element => element.id === newData.onPhotoUploadDelete.id)
+		if (typeof index == 'undefined') return;
+		this.state.album.photos.items.splice(index,1)
   };
 
   async loadMorePhotos() {
-    if (!this.state.hasMorePhotos) return;
+		if (!this.state.hasMorePhotos) return;
 
     this.setState({ loading: true });
     const { data } = await API.graphql(
@@ -536,7 +527,8 @@ class AlbumDetailsLoader extends React.Component {
         id: this.props.id,
         nextTokenForPhotos: this.state.nextTokenForPhotos
       })
-    );
+		);
+		console.log("IN loadMorePhotos, query results ", JSON.stringify(data))
 
     let album;
     if (this.state.album === null) {
@@ -553,7 +545,7 @@ class AlbumDetailsLoader extends React.Component {
       nextTokenForPhotos: data.getAlbum.photos.nextToken,
       hasMorePhotos: data.getAlbum.photos.nextToken !== null
     });
-    console.log("PhotosLoader" + JSON.stringify(album));
+    console.log("PhotosLoader " + JSON.stringify(album));
   }
 
   componentDidMount() {
@@ -565,11 +557,11 @@ class AlbumDetailsLoader extends React.Component {
       <Segment>
       <Connect
         query={graphqlOperation(GetAlbum)}
-        subscription={graphqlOperation(SubscribeToDeletePhoto)}
-        onSubscriptionMsg={this.onDeletePhoto}
+        subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
+        onSubscriptionMsg={this.onCreateOrDeletePhoto}
       >
         {({ data }) => {
-          console.log("In connect , the data is ", JSON.stringify(data))
+          console.log("In Connect , the data is ", JSON.stringify(data))
           return <AlbumDetails
             loadingPhotos={this.state.loading}
             album={this.state.album}
