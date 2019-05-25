@@ -3,6 +3,7 @@
 import React, { Component } from "react";
 import Counter from "./counter/Counter";
 import Picture from "./picture/Picture";
+import { Card, CardContent, CardGroup } from "semantic-ui-react";
 
 import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import "./App.css";
@@ -62,7 +63,6 @@ const DeletePhoto = `mutation DeletePhoto($id: ID!){
  }
 }`;
 
-
 const ListAlbums = `query ListAlbums {
   listAlbums(limit: 9999) {
       items {
@@ -71,7 +71,6 @@ const ListAlbums = `query ListAlbums {
       }
   }
 }`;
-
 
 const SubscribeToUploadDeletePhoto = `
 subscription OnPhotoUploadDelete{
@@ -90,7 +89,6 @@ const SubscribeToNewAlbums = `
     }
   }
 `;
-
 
 const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
     getAlbum(id: $id) {
@@ -213,16 +211,15 @@ class S3ImageUpload extends React.Component {
 
     const result = await Storage.put(fileName, file, {
       customPrefix: { public: "uploads/" },
-			metadata: { albumid: this.props.albumId }
-		}
-		);
-		console.log("Triggering mutation for photo ", fileName);
-		await API.graphql(
-				graphqlOperation(UploadPhoto, {
-					albumId: this.props.albumId, action:"PhotoUploaded"
-				})
-			);
-
+      metadata: { albumid: this.props.albumId }
+    });
+    console.log("Triggering mutation for photo ", fileName);
+    await API.graphql(
+      graphqlOperation(UploadPhoto, {
+        albumId: this.props.albumId,
+        action: "PhotoUploaded"
+      })
+    );
   };
 
   onChange = async e => {
@@ -264,14 +261,14 @@ class S3ImageUpload extends React.Component {
             document.getElementById("add-image-file-input").click()
           }
           disabled={this.state.uploading}
-          icon="file image outline"
+          icon="file image outline" 
           content={this.state.uploading ? "Uploading..." : "Add Images"}
         />
         <input
           id="add-image-file-input"
           type="file"
           accept="image/*"
-          multiple
+          multiple className="orangeButton"
           onChange={this.onChange}
           style={{ display: "none" }}
         />
@@ -419,8 +416,8 @@ class NewAlbum extends Component {
           type="text"
           placeholder="New Album Name"
           icon="plus"
-          iconPosition="left"
-          action={{ content: "Create", onClick: this.handleSubmit }}
+          iconPosition="left" className="orangeButton"
+          action={{ content: "Create", onClick: this.handleSubmit}}
           name="albumName"
           value={this.state.albumName}
           onChange={this.handleChange}
@@ -469,9 +466,20 @@ class Lightbox extends Component {
 class AlbumsList extends React.Component {
   albumItems() {
     return this.props.albums.sort(makeComparator("name")).map(album => (
-      <List.Item key={album.id}>
-        <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
-      </List.Item>
+      <Card key={album.id} className="albumCard">
+        <Image
+          avatar
+          src="https://react.semantic-ui.com/images/avatar/small/lena.png"
+        />
+        <Card.Content>
+          <Card.Header>           
+            <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
+          </Card.Header>
+             
+      <Card.Description>Some quick example text to build on the card title and make up the bulk
+        of the card's content.</Card.Description>       
+        </Card.Content>        
+      </Card>
     ));
   }
 
@@ -479,9 +487,9 @@ class AlbumsList extends React.Component {
     return (
       <Segment>
         <Header as="h3">My Albums</Header>
-        <List divided relaxed>
-          {this.albumItems()}
-        </List>
+        <Container className="containerAlbum" text style={{ marginTop: "2em" }}>
+          <Card.Group>{this.albumItems()}</Card.Group>
+        </Container>
       </Segment>
     );
   }
@@ -501,25 +509,36 @@ class AlbumDetailsLoader extends React.Component {
 
   onCreateOrDeletePhoto = async (prevQuery, newData) => {
     // When we get notified about the delete we need to update the state
-		// and remove the deleted photo from the list of photos
-		const sleep = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000))
-		if (newData.onPhotoUploadDelete.bucket === "PhotoUploaded" && this.state.album.id === newData.onPhotoUploadDelete.id){
-			console.log("CONGRATS! There was an upload for album: ",newData.onPhotoUploadDelete.id,"Current album: ", this.state.album.id );
+    // and remove the deleted photo from the list of photos
+    const sleep = seconds =>
+      new Promise(resolve => setTimeout(resolve, seconds * 1000));
+    if (
+      newData.onPhotoUploadDelete.bucket === "PhotoUploaded" &&
+      this.state.album.id === newData.onPhotoUploadDelete.id
+    ) {
+      console.log(
+        "CONGRATS! There was an upload for album: ",
+        newData.onPhotoUploadDelete.id,
+        "Current album: ",
+        this.state.album.id
+      );
 
-			await sleep(8);
-			this.state.hasMorePhotos = true
-		  this.state.nextTokenForPhotos = null
-		  this.state.album = null
-		  this.loadMorePhotos()
-			return;
-		}
-		var index = this.state.album.photos.items.findIndex(element => element.id === newData.onPhotoUploadDelete.id)
-		if (typeof index == 'undefined') return;
-		this.state.album.photos.items.splice(index,1)
+      await sleep(8);
+      this.state.hasMorePhotos = true;
+      this.state.nextTokenForPhotos = null;
+      this.state.album = null;
+      this.loadMorePhotos();
+      return;
+    }
+    var index = this.state.album.photos.items.findIndex(
+      element => element.id === newData.onPhotoUploadDelete.id
+    );
+    if (typeof index == "undefined") return;
+    this.state.album.photos.items.splice(index, 1);
   };
 
   async loadMorePhotos() {
-		if (!this.state.hasMorePhotos) return;
+    if (!this.state.hasMorePhotos) return;
 
     this.setState({ loading: true });
     const { data } = await API.graphql(
@@ -527,8 +546,8 @@ class AlbumDetailsLoader extends React.Component {
         id: this.props.id,
         nextTokenForPhotos: this.state.nextTokenForPhotos
       })
-		);
-		console.log("IN loadMorePhotos, query results ", JSON.stringify(data))
+    );
+    console.log("IN loadMorePhotos, query results ", JSON.stringify(data));
 
     let album;
     if (this.state.album === null) {
@@ -554,23 +573,25 @@ class AlbumDetailsLoader extends React.Component {
 
   render() {
     return (
-      <Segment>
-      <Connect
-        query={graphqlOperation(GetAlbum)}
-        subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
-        onSubscriptionMsg={this.onCreateOrDeletePhoto}
-      >
-        {({ data }) => {
-          console.log("In Connect , the data is ", JSON.stringify(data))
-          return <AlbumDetails
-            loadingPhotos={this.state.loading}
-            album={this.state.album}
-            loadMorePhotos={this.loadMorePhotos.bind(this)}
-            hasMorePhotos={this.state.hasMorePhotos}
-          />
-        }}
-      </Connect>
-      </Segment>
+      
+        <Connect
+          query={graphqlOperation(GetAlbum)}
+          subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
+          onSubscriptionMsg={this.onCreateOrDeletePhoto}
+        >
+          {({ data }) => {
+            console.log("In Connect , the data is ", JSON.stringify(data));
+            return (
+              <AlbumDetails
+                loadingPhotos={this.state.loading}
+                album={this.state.album}
+                loadMorePhotos={this.loadMorePhotos.bind(this)}
+                hasMorePhotos={this.state.hasMorePhotos}
+              />
+            );
+          }}
+        </Connect>
+      
     );
   }
 }
@@ -635,12 +656,15 @@ class App extends Component {
     return (
       <Router>
         <Grid padded>
-          <Grid.Column>
+          <Grid.Column  className="columnAlbum">
             <Route path="/" exact component={NewAlbum} />
             <Route path="/" exact component={AlbumsListLoader} />
             <Route path="/" exact component={Search} />
-
-            <Route
+            </Grid.Column>
+        </Grid>
+        <Grid padded>
+        <Grid.Column>
+            <Route className="columnPhoto"
               path="/albums/:albumId"
               render={() => (
                 <div>
@@ -648,14 +672,13 @@ class App extends Component {
                 </div>
               )}
             />
-            <Route
+            <Route className="columnPhoto"
               path="/albums/:albumId"
               render={props => (
                 <AlbumDetailsLoader id={props.match.params.albumId} />
               )}
             />
-          </Grid.Column>
-        </Grid>
+          </Grid.Column></Grid>
       </Router>
     );
   }
