@@ -1,9 +1,9 @@
 // src/App.js
 
 import React, { Component } from "react";
-
 import Counter from "./counter/Counter";
 import Picture from "./picture/Picture";
+import { Card, CardContent, CardGroup } from "semantic-ui-react";
 
 import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import "./App.css";
@@ -45,11 +45,13 @@ function makeComparator(key, order = "asc") {
   };
 }
 
-const CreateComment = `mutation CreateComment($text:String!, $sentiment: String!, photoID: String!){
-	 createComment(input:{text: $text, sentiment: $sentiment, commentPhotoId: $photoId})
-  {
+const UploadPhoto = `
+mutation UploadPhoto($albumId:ID!, $action: String)
+{
+	uploadPhoto(albumId: $albumId, action: $action)
+	{
     id
-    sentiment
+    bucket
   }
 }`;
 
@@ -57,22 +59,24 @@ const DeletePhoto = `mutation DeletePhoto($id: ID!){
   deletePhoto(input:{id: $id})
  {
    id
-   
+   bucket
  }
 }`;
 
 const ListAlbums = `query ListAlbums {
-	listAlbums(limit: 9999) {
-			items {
-					id
-					name
-			}
-	}
+  listAlbums(limit: 9999) {
+      items {
+          id
+          name
+      }
+  }
 }`;
-const SubscribeToDeletePhoto = `
-subscription OnDeletePhoto {
-  onDeletePhoto {
-    id    
+
+const SubscribeToUploadDeletePhoto = `
+subscription OnPhotoUploadDelete{
+  onPhotoUploadDelete{
+    id
+    bucket
   }
 }
 `;
@@ -91,20 +95,20 @@ const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
     id
     name
     photos(sortDirection: DESC, nextToken: $nextTokenForPhotos) {
-			nextToken
+      nextToken
       items {
-				id
-				score
+        id
+        score
         thumbnail {
           width
           height
           key
-				}
-				fullsize {
-					width
-					height
-					key
-				}
+        }
+        fullsize {
+          width
+          height
+          key
+        }
       }
     }
   }
@@ -209,8 +213,13 @@ class S3ImageUpload extends React.Component {
       customPrefix: { public: "uploads/" },
       metadata: { albumid: this.props.albumId }
     });
-
-    console.log("Uploaded file: ", result);
+    console.log("Triggering mutation for photo ", fileName);
+    await API.graphql(
+      graphqlOperation(UploadPhoto, {
+        albumId: this.props.albumId,
+        action: "PhotoUploaded"
+      })
+    );
   };
 
   onChange = async e => {
@@ -252,14 +261,14 @@ class S3ImageUpload extends React.Component {
             document.getElementById("add-image-file-input").click()
           }
           disabled={this.state.uploading}
-          icon="file image outline"
+          icon="file image outline" 
           content={this.state.uploading ? "Uploading..." : "Add Images"}
         />
         <input
           id="add-image-file-input"
           type="file"
           accept="image/*"
-          multiple
+          multiple className="orangeButton"
           onChange={this.onChange}
           style={{ display: "none" }}
         />
@@ -292,15 +301,7 @@ class PhotosList extends React.Component {
   removeImageOld = id => {
     this.setState({});
   };
-  /*
-   deletePlayer = id => {
-    this.setState({
-      teamPlayers: this.state.teamPlayers.filter(
-        player => player.idTeam !== id,
-      ),
-    });
-  };
-  */
+
   handlePhotoClick(id) {
     let items = this.props.photos;
     console.log("photoClick photoClick:SIZE" + items.map.size);
@@ -316,27 +317,7 @@ class PhotosList extends React.Component {
               (photo.thumbnail.key === id)
           )
     );
-    //this.setState({
-    // selectedPhoto: id
-    //});
   }
-  // handlePhotoClickOld(id) {
-  //   console.log("handlePhotoClick photoClick: " + id);
-  //   let ObjNum = this.props.photos.find(photo => photo.thumbnail.key === id);
-  //   //{
-  //   //items.map(photo => console.log(id + "VALUE::" + photo.thumbnail.key));
-  //   //}
-  //   // console.log("handlePhotoClick photoClick: " + photo.thumbnail.key);
-  //   //photo.thumbnail.key = "public/" + photo.thumbnail.key;
-  //   //return photo;
-  //   // }
-  //   //});
-
-  //   this.setState({
-  //     selectedPhoto: ObjNum
-  //   });
-  //   console.log("SELECTEDkkkk::" + this.state.selectedPhoto);
-  // }
 
   handleLightboxClose = () => {
     console.log(
@@ -435,8 +416,8 @@ class NewAlbum extends Component {
           type="text"
           placeholder="New Album Name"
           icon="plus"
-          iconPosition="left"
-          action={{ content: "Create", onClick: this.handleSubmit }}
+          iconPosition="left" className="orangeButton"
+          action={{ content: "Create", onClick: this.handleSubmit}}
           name="albumName"
           value={this.state.albumName}
           onChange={this.handleChange}
@@ -485,9 +466,20 @@ class Lightbox extends Component {
 class AlbumsList extends React.Component {
   albumItems() {
     return this.props.albums.sort(makeComparator("name")).map(album => (
-      <List.Item key={album.id}>
-        <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
-      </List.Item>
+      <Card key={album.id} className="albumCard">
+        <Image
+          avatar
+          src="https://react.semantic-ui.com/images/avatar/small/lena.png"
+        />
+        <Card.Content>
+          <Card.Header>           
+            <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
+          </Card.Header>
+             
+      <Card.Description>Some quick example text to build on the card title and make up the bulk
+        of the card's content.</Card.Description>       
+        </Card.Content>        
+      </Card>
     ));
   }
 
@@ -495,9 +487,9 @@ class AlbumsList extends React.Component {
     return (
       <Segment>
         <Header as="h3">My Albums</Header>
-        <List divided relaxed>
-          {this.albumItems()}
-        </List>
+        <Container className="containerAlbum" text style={{ marginTop: "2em" }}>
+          <Card.Group>{this.albumItems()}</Card.Group>
+        </Container>
       </Segment>
     );
   }
@@ -515,6 +507,36 @@ class AlbumDetailsLoader extends React.Component {
     };
   }
 
+  onCreateOrDeletePhoto = async (prevQuery, newData) => {
+    // When we get notified about the delete we need to update the state
+    // and remove the deleted photo from the list of photos
+    const sleep = seconds =>
+      new Promise(resolve => setTimeout(resolve, seconds * 1000));
+    if (
+      newData.onPhotoUploadDelete.bucket === "PhotoUploaded" &&
+      this.state.album.id === newData.onPhotoUploadDelete.id
+    ) {
+      console.log(
+        "CONGRATS! There was an upload for album: ",
+        newData.onPhotoUploadDelete.id,
+        "Current album: ",
+        this.state.album.id
+      );
+
+      await sleep(8);
+      this.state.hasMorePhotos = true;
+      this.state.nextTokenForPhotos = null;
+      this.state.album = null;
+      this.loadMorePhotos();
+      return;
+    }
+    var index = this.state.album.photos.items.findIndex(
+      element => element.id === newData.onPhotoUploadDelete.id
+    );
+    if (typeof index == "undefined") return;
+    this.state.album.photos.items.splice(index, 1);
+  };
+
   async loadMorePhotos() {
     if (!this.state.hasMorePhotos) return;
 
@@ -525,6 +547,7 @@ class AlbumDetailsLoader extends React.Component {
         nextTokenForPhotos: this.state.nextTokenForPhotos
       })
     );
+    console.log("IN loadMorePhotos, query results ", JSON.stringify(data));
 
     let album;
     if (this.state.album === null) {
@@ -541,7 +564,7 @@ class AlbumDetailsLoader extends React.Component {
       nextTokenForPhotos: data.getAlbum.photos.nextToken,
       hasMorePhotos: data.getAlbum.photos.nextToken !== null
     });
-    console.log("PhotosLoader" + JSON.stringify(album));
+    console.log("PhotosLoader " + JSON.stringify(album));
   }
 
   componentDidMount() {
@@ -550,12 +573,25 @@ class AlbumDetailsLoader extends React.Component {
 
   render() {
     return (
-      <AlbumDetails
-        loadingPhotos={this.state.loading}
-        album={this.state.album}
-        loadMorePhotos={this.loadMorePhotos.bind(this)}
-        hasMorePhotos={this.state.hasMorePhotos}
-      />
+      
+        <Connect
+          query={graphqlOperation(GetAlbum)}
+          subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
+          onSubscriptionMsg={this.onCreateOrDeletePhoto}
+        >
+          {({ data }) => {
+            console.log("In Connect , the data is ", JSON.stringify(data));
+            return (
+              <AlbumDetails
+                loadingPhotos={this.state.loading}
+                album={this.state.album}
+                loadMorePhotos={this.loadMorePhotos.bind(this)}
+                hasMorePhotos={this.state.hasMorePhotos}
+              />
+            );
+          }}
+        </Connect>
+      
     );
   }
 }
@@ -620,12 +656,15 @@ class App extends Component {
     return (
       <Router>
         <Grid padded>
-          <Grid.Column>
+          <Grid.Column  className="columnAlbum">
             <Route path="/" exact component={NewAlbum} />
             <Route path="/" exact component={AlbumsListLoader} />
             <Route path="/" exact component={Search} />
-
-            <Route
+            </Grid.Column>
+        </Grid>
+        <Grid padded>
+        <Grid.Column>
+            <Route className="columnPhoto"
               path="/albums/:albumId"
               render={() => (
                 <div>
@@ -633,14 +672,13 @@ class App extends Component {
                 </div>
               )}
             />
-            <Route
+            <Route className="columnPhoto"
               path="/albums/:albumId"
               render={props => (
                 <AlbumDetailsLoader id={props.match.params.albumId} />
               )}
             />
-          </Grid.Column>
-        </Grid>
+          </Grid.Column></Grid>
       </Router>
     );
   }

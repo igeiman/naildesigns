@@ -1,12 +1,10 @@
 import React, { Component } from "react";
-import Survey from "../survey/Survey";
-import Counter from "../counter/Counter";
-import { Card, Icon, Image } from "semantic-ui-react";
-import { Connect, S3Image, withAuthenticator } from "aws-amplify-react";
+import { Card } from "semantic-ui-react";
+import {  S3Image } from "aws-amplify-react";
 import "semantic-ui-css/semantic.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
-import Amplify, { API, graphqlOperation, Storage } from "aws-amplify";
+import { API, graphqlOperation } from "aws-amplify";
 import "../picture/Picture.css";
 
 const UpdatePhoto = `mutation UpdatePhoto($id: ID!, $score: Int) {
@@ -121,7 +119,7 @@ export default class Picture extends Component {
             </span>
             <button
               onClick={() => this.handleIncrement({})}
-              className="ui button"
+              className="likeButton"
             >
               <label>Press it if you like it</label>
             </button>

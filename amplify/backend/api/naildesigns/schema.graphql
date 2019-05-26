@@ -1,9 +1,13 @@
 # amplify/backend/api/photo-albums/schema.graphql
 
-type Album @model @auth(rules: [
-	{allow: owner}
-	{ allow: owner, ownerField: "members", queries: [get, list], mutations: null }
-	]) {
+# type Album @model @auth(rules: [
+# 	{allow: owner}
+# 	{ allow: owner, ownerField: "members", queries: [get, list], mutations: null }
+#	])
+
+
+
+type Album @model {
     id: ID!
     name: String!
     photos: [Photo] @connection(name: "AlbumPhotos")
@@ -26,7 +30,7 @@ type PhotoS3Info {
     height: Int!
 }
 
-type Comment @model @auth(rules: [{allow: owner}]) @searchable {
+type Comment @model  @searchable {
 	id: ID!
 	photo: Photo @connection(name: "CommentsPhoto")
     text: String!
@@ -35,13 +39,18 @@ type Comment @model @auth(rules: [{allow: owner}]) @searchable {
 
 type Subscription {
     upload(id: String!): Label
-    @aws_subscribe(mutations: ["labeled"])
+    	@aws_subscribe(mutations: ["labeled"])
+	onPhotoUploadDelete: Photo
+		@aws_subscribe(mutations: ["uploadPhoto","deletePhoto"])
 }
 
 type Mutation {
     labeled( photoid: String!): Label!
+	uploadPhoto(albumId: ID!, action: String): Photo,
+	uploadPhotoLocal(albumId: ID!, action: String): Photo
 }
 
 type Label {
     label: String!
 }
+
