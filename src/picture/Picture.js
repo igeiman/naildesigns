@@ -119,7 +119,7 @@ export default class Picture extends Component {
             </span>
             <button
               onClick={() => this.handleIncrement({})}
-              className="ui button"
+              className="likeButton"
             >
               <label>Press it if you like it</label>
             </button>
