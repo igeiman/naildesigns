@@ -46,7 +46,8 @@ type Subscription {
 
 type Mutation {
     labeled( photoid: String!): Label!
-	uploadPhoto(albumId: ID!, action: String): Photo
+	uploadPhoto(albumId: ID!, action: String): Photo,
+	uploadPhotoLocal(albumId: ID!, action: String): Photo
 }
 
 type Label {

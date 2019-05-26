@@ -6,5 +6,7 @@
             "authcognitoafe4cbce",
             "Outputs.UserPoolId"
         ]
-    }
+    },
+    "S3DeploymentBucket": "nail-designs-20190414134207-deployment",
+    "S3DeploymentRootKey": "amplify-appsync-files/4de40d9b284ac62e4246635c18c800689546bf1a"
 }

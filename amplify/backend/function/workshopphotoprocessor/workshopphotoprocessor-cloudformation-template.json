@@ -42,14 +42,14 @@
 				},
 				"Code": {
 					"S3Bucket": "nail-designs-20190414134207-deployment",
-					"S3Key": "amplify-builds/workshopphotoprocessor-1557895891-latest-build.zip"
+					"S3Key": "amplify-builds/workshopphotoprocessor-1558498104-latest-build.zip"
 				}
 			}
 		},
 		"LambdaExecutionRole": {
 			"Type": "AWS::IAM::Role",
 			"Properties": {
-				"RoleName": "photoalbumsLambdaRole91d2faf3",
+				"RoleName": "photoalbumsLambdaRole91d2faf4",
 				"AssumeRolePolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
