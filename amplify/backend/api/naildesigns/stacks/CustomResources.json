@@ -31,10 +31,6 @@
 		}
 	},
 	"Resources": {
-		"EmptyResource": {
-			"Type": "Custom::EmptyResource",
-			"Condition": "AlwaysFalse"
-		},
 		"LocalDataSource": {
 			"Type": "AWS::AppSync::DataSource",
 			"Properties": {

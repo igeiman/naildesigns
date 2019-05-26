@@ -171,7 +171,12 @@ async function processRecord(record) {
 	}
 
     const labelNames = await getLabelNames(bucketName, sizes.fullsize.key);
-    const id = uuidv4();
+	const id = uuidv4();
+	if (! labelNames.includes("manicure") && !labelNames.includes("nail") ) {
+		console.log("Image does not contain nail designs! Exiting...")
+		// send emails via ses
+		return;
+	}
     const item = {
         id: id,
         owner: metadata.owner,
