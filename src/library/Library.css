@@ -14,7 +14,7 @@
   margin-bottom: 54px !important;
   width: 230px !important;
   height: 300px !important;
-  padding-left: 10px;
+  padding-left: 0px;
 }
 
 .flex-row-container {
@@ -24,8 +24,9 @@
   justify-content: space-around;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  padding: 10px 10px;
+
+  padding: 10px 30px;
+  justify-content: space-around;
 }
 .flex-row-container > .flex-row-item {
   flex-grow: 1;

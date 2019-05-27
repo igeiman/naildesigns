@@ -269,7 +269,8 @@ class S3ImageUpload extends React.Component {
           id="add-image-file-input"
           type="file"
           accept="image/*"
-          multiple className="orangeButton"
+          multiple
+          className="orangeButton"
           onChange={this.onChange}
           style={{ display: "none" }}
         />
@@ -417,8 +418,9 @@ class NewAlbum extends Component {
           type="text"
           placeholder="New Album Name"
           icon="plus"
-          iconPosition="left" className="orangeButton"
-          action={{ content: "Create", onClick: this.handleSubmit}}
+          iconPosition="left"
+          className="orangeButton"
+          action={{ content: "Create", onClick: this.handleSubmit }}
           name="albumName"
           value={this.state.albumName}
           onChange={this.handleChange}
@@ -477,7 +479,7 @@ class AlbumsList extends React.Component {
             <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
           </Card.Header>
 
-      <Card.Description>{album.description}</Card.Description>
+          <Card.Description>{album.description}</Card.Description>
         </Card.Content>
       </Card>
     ));
@@ -573,25 +575,23 @@ class AlbumDetailsLoader extends React.Component {
 
   render() {
     return (
-
-        <Connect
-          query={graphqlOperation(GetAlbum)}
-          subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
-          onSubscriptionMsg={this.onCreateOrDeletePhoto}
-        >
-          {({ data }) => {
-            console.log("In Connect , the data is ", JSON.stringify(data));
-            return (
-              <AlbumDetails
-                loadingPhotos={this.state.loading}
-                album={this.state.album}
-                loadMorePhotos={this.loadMorePhotos.bind(this)}
-                hasMorePhotos={this.state.hasMorePhotos}
-              />
-            );
-          }}
-        </Connect>
-
+      <Connect
+        query={graphqlOperation(GetAlbum)}
+        subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
+        onSubscriptionMsg={this.onCreateOrDeletePhoto}
+      >
+        {({ data }) => {
+          console.log("In Connect , the data is ", JSON.stringify(data));
+          return (
+            <AlbumDetails
+              loadingPhotos={this.state.loading}
+              album={this.state.album}
+              loadMorePhotos={this.loadMorePhotos.bind(this)}
+              hasMorePhotos={this.state.hasMorePhotos}
+            />
+          );
+        }}
+      </Connect>
     );
   }
 }
@@ -655,30 +655,33 @@ class App extends Component {
   render() {
     return (
       <Router>
-        <Grid padded>
-          <Grid.Column  className="columnAlbum">
+        <Grid padded className="gridUI">
+          <Grid.Column className="columnAlbum">
             <Route path="/" exact component={NewAlbum} />
             <Route path="/" exact component={AlbumsListLoader} />
             <Route path="/" exact component={Search} />
-            </Grid.Column>
+          </Grid.Column>
         </Grid>
-        <Grid padded>
-        <Grid.Column>
-            <Route className="columnPhoto"
+        <Grid padded className="gridUI">
+          <Grid.Column>
+            <Route
+              className="columnPhoto"
               path="/albums/:albumId"
               render={() => (
                 <div>
-                  <NavLink to="/">Back to Albums list</NavLink>
+                  <NavLink to="/"><h3>Back to Albums list</h3></NavLink>
                 </div>
               )}
             />
-            <Route className="columnPhoto"
+            <Route
+              className="columnPhoto"
               path="/albums/:albumId"
               render={props => (
                 <AlbumDetailsLoader id={props.match.params.albumId} />
               )}
             />
-          </Grid.Column></Grid>
+          </Grid.Column>
+        </Grid>
       </Router>
     );
   }
