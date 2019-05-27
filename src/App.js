@@ -669,7 +669,9 @@ class App extends Component {
               path="/albums/:albumId"
               render={() => (
                 <div>
-                  <NavLink to="/"><h3>Back to Albums list</h3></NavLink>
+                  <NavLink to="/">
+                    <h3>Back to Albums list</h3>
+                  </NavLink>
                 </div>
               )}
             />
