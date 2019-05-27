@@ -10,6 +10,7 @@
 type Album @model {
     id: ID!
     name: String!
+	description: String
     photos: [Photo] @connection(name: "AlbumPhotos")
 }
 

@@ -67,7 +67,8 @@ const ListAlbums = `query ListAlbums {
   listAlbums(limit: 9999) {
       items {
           id
-          name
+					name
+					description
       }
   }
 }`;
@@ -261,7 +262,7 @@ class S3ImageUpload extends React.Component {
             document.getElementById("add-image-file-input").click()
           }
           disabled={this.state.uploading}
-          icon="file image outline" 
+          icon="file image outline"
           content={this.state.uploading ? "Uploading..." : "Add Images"}
         />
         <input
@@ -472,13 +473,12 @@ class AlbumsList extends React.Component {
           src="https://react.semantic-ui.com/images/avatar/small/lena.png"
         />
         <Card.Content>
-          <Card.Header>           
+          <Card.Header>
             <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
           </Card.Header>
-             
-      <Card.Description>Some quick example text to build on the card title and make up the bulk
-        of the card's content.</Card.Description>       
-        </Card.Content>        
+
+      <Card.Description>{album.description}</Card.Description>
+        </Card.Content>
       </Card>
     ));
   }
@@ -573,7 +573,7 @@ class AlbumDetailsLoader extends React.Component {
 
   render() {
     return (
-      
+
         <Connect
           query={graphqlOperation(GetAlbum)}
           subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
@@ -591,7 +591,7 @@ class AlbumDetailsLoader extends React.Component {
             );
           }}
         </Connect>
-      
+
     );
   }
 }
