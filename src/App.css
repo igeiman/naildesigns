@@ -81,7 +81,7 @@ img {
 
 body {
   min-height: 200vh;
-  background-color: hsl(303, 49%, 55%);
+  background-color: rgb(120, 80, 200);
   display: flex;
   justify-content: center;
   border: none;
