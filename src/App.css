@@ -81,7 +81,7 @@ img {
 
 body {
   min-height: 200vh;
-  background-color: rgb(120, 80, 200);
+  background-image: url(background.jpg);
   display: flex;
   justify-content: center;
   border: none;
