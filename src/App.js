@@ -4,7 +4,10 @@ import React, { Component } from "react";
 import Counter from "./counter/Counter";
 import Picture from "./picture/Picture";
 import { Card, CardContent, CardGroup } from "semantic-ui-react";
-
+import image1 from "./image1.png";
+import image2 from "./image2.png";
+import image3 from "./image3.png";
+import image4 from "./image4.png";
 import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import "./App.css";
 import "./library/Library.css";
@@ -468,12 +471,11 @@ class Lightbox extends Component {
 
 class AlbumsList extends React.Component {
   albumItems() {
+    const images = ["image1.png", "image2.png", "image3.png", "image4.png"];
+    let imageIndex = 0;
     return this.props.albums.sort(makeComparator("name")).map(album => (
       <Card key={album.id} className="albumCard">
-        <Image
-          avatar
-          src="https://react.semantic-ui.com/images/avatar/small/lena.png"
-        />
+        <Image avatar src={require(`./${images[imageIndex++]}`)} />
         <Card.Content>
           <Card.Header>
             <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>

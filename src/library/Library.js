@@ -48,17 +48,7 @@ export default class Library extends Component {
         <h1>How many books did you read? {this.state.reads}</h1>
         <div className="library__books">
           {this.state.books.map((_book, _id) => {
-            return (
-              <Book
-                handleCounter={this.handleCounter}
-                key={_id}
-                id={_book.isbn}
-                name={_book.name}
-                isbn={_book.isbn}
-                author={_book.author}
-                cover={_book.cover}
-              />
-            );
+            return <div />;
           })}
         </div>
       </div>
