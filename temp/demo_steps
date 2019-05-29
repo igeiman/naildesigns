@@ -1,0 +1,48 @@
+1. Create web app with AWS Amplify CLI
+
+	npm install aws-amplify aws-amplify-react
+	npx create-react-app meetup_demo; cd meetup_demo
+	npm install --save semantic-ui-react
+
+	amplify init
+    amplify add hosting
+    amplify push
+	amplify publish
+	amplify serve
+
+2. Adding authentication
+    amplify add auth
+	amplify status
+	amplify push
+	amplify serve
+	amplify delete
+
+3. Multiple environments
+	amplify env list
+	amplify env add test
+	amplify env checkout test
+	amplify status
+
+========================================================
+import React, { Component } from 'react';
+import { Header } from 'semantic-ui-react';
+
+import Amplify from 'aws-amplify';
+import aws_exports from './aws-exports';
+import { withAuthenticator } from 'aws-amplify-react';
+Amplify.configure(aws_exports);
+
+
+class App extends Component {
+    render() {
+        return (
+            <div>
+                <Header as='h1'>Hello World!</Header>
+            </div>
+        );
+    }
+}
+
+export default withAuthenticator(App, {includeGreetings: true});
+
+
