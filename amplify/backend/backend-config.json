@@ -13,5 +13,7 @@
 				"securityType": "AMAZON_COGNITO_USER_POOLS"
 			}
 		}
-	}
+	},
+	"storage": {},
+	"function": {}
 }
