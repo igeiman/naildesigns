@@ -133,7 +133,7 @@ async function sendEmail(metadata) {
 
 // Create publish parameters
   var params = {
-	Message: `The owner of album ${metadata.albumid} attempted moderated content upload`, /* required */
+	Message: `The owner of album ${metadata.albumid} attempted moderated content upload. `, /* required */
 	TopicArn: TOPIC_ARN
   };
 
