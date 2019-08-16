@@ -21,7 +21,7 @@ const Sharp = require('sharp');
 const THUMBNAIL_WIDTH = parseInt(process.env.THUMBNAIL_WIDTH, 10);
 const THUMBNAIL_HEIGHT = parseInt(process.env.THUMBNAIL_HEIGHT, 10);
 const DYNAMODB_PHOTOS_TABLE_NAME = process.env.DYNAMODB_PHOTOS_TABLE_ARN.split('/')[1];
-const TOPIC_ARN = "arn:aws:sns:us-east-1:357527257673:moderation";
+const TOPIC_ARN = process.env.SNS_TOPIC;
 
 async function getLabelNames(bucketName, key) {
   let params = {
@@ -157,7 +157,6 @@ async function processRecord(record) {
     const key = record.s3.object.key;
 
     if (key.indexOf('uploads') != 0) return;
-
     const metadata = await getMetadata(bucketName, key);
 	const sizes = await resize(bucketName, key);
 	const explicitContent = await detectExplicitConetnt(bucketName, sizes.fullsize.key);
@@ -174,7 +173,7 @@ async function processRecord(record) {
 	const id = uuidv4();
 	if (! labelNames.includes("manicure") && !labelNames.includes("nail") ) {
 		console.log("Image does not contain nail designs! Exiting...")
-		// send emails via ses
+		// send emails via sns
 		return;
 	}
     const item = {

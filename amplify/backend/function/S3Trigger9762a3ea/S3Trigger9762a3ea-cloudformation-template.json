@@ -76,8 +76,8 @@
 				"Runtime": "nodejs8.10",
 				"Timeout": "25",
 				"Code": {
-					"S3Bucket": "nail-designs-20190815214424-deployment",
-					"S3Key": "amplify-builds/S3Trigger9762a3ea-7675694d4b5a6171436e-build.zip"
+					"S3Bucket": "nail-designs-august-20190816044816-deployment",
+					"S3Key": "amplify-builds/S3Trigger9762a3ea-706863614e444965624b-build.zip"
 				}
 			}
 		},
