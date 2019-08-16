@@ -641,10 +641,14 @@ class AlbumsListLoader extends React.Component {
         onSubscriptionMsg={this.onNewAlbum}
       >
         {({ data, loading }) => {
+					console.log ("WHAT?!!")
+					console.log(data)
+					console.log(loading)
           if (loading) {
             return <div>Loading Now...</div>;
-          }
-          if (!data.listAlbums) return;
+					}
+
+          if (data === undefined || !data.listAlbums) return;
 
           return <AlbumsList albums={data.listAlbums.items} />;
         }}

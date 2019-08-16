@@ -1,38 +1,8 @@
 {
 	"auth": {
-		"cognitoafe4cbce": {
+		"cognitof3c924d4": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation"
 		}
-	},
-	"api": {
-		"naildesigns": {
-			"service": "AppSync",
-			"providerPlugin": "awscloudformation",
-			"output": {
-				"securityType": "AMAZON_COGNITO_USER_POOLS"
-			}
-		}
-	},
-	"storage": {
-		"designs": {
-			"service": "S3",
-			"providerPlugin": "awscloudformation"
-		}
-	},
-	"function": {
-		"workshopphotoprocessor": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": []
-		}
-	},
-	"hosting": {
-		"S3AndCloudFront": {
-			"service": "S3AndCloudFront",
-			"providerPlugin": "awscloudformation"
-		}
-	},
-	"interactions": {}
+	}
 }
