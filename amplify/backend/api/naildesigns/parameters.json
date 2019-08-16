@@ -1,0 +1,10 @@
+{
+    "AppSyncApiName": "naildesigns",
+    "DynamoDBBillingMode": "PAY_PER_REQUEST",
+    "AuthCognitoUserPoolId": {
+        "Fn::GetAtt": [
+            "authcognitof3c924d4",
+            "Outputs.UserPoolId"
+        ]
+    }
+}
