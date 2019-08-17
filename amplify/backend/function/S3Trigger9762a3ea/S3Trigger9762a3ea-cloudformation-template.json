@@ -11,8 +11,9 @@
 		"DynamoDBPhotosTableArn": {
 			"Type": "String"
 		},
-		"ModeratorSNS": {
-			"Type": "String"
+		"snsmoderationTopicArn": {
+			"Type": "String",
+			"Default": "snsmoderationTopicArn"
 		}
 	},
 	"Conditions": {
@@ -60,7 +61,7 @@
 						"THUMBNAIL_WIDTH": "80",
 						"THUMBNAIL_HEIGHT": "80",
 						"SNS_TOPIC": {
-							"Ref": "ModeratorSNS"
+							"Ref": "snsmoderationTopicArn"
 						},
 						"DYNAMODB_PHOTOS_TABLE_ARN": {
 							"Ref": "DynamoDBPhotosTableArn"
@@ -76,8 +77,8 @@
 				"Runtime": "nodejs8.10",
 				"Timeout": "25",
 				"Code": {
-					"S3Bucket": "nail-designs-august-20190816044816-deployment",
-					"S3Key": "amplify-builds/S3Trigger9762a3ea-706863614e444965624b-build.zip"
+					"S3Bucket": "nail-designs-snstest-20190816161742-deployment",
+					"S3Key": "amplify-builds/S3Trigger9762a3ea-376641572f46384b786e-build.zip"
 				}
 			}
 		},
@@ -163,7 +164,7 @@
 							"Effect": "Allow",
 							"Action": "sns:Publish",
 							"Resource": {
-								"Ref": "ModeratorSNS"
+								"Ref": "snsmoderationTopicArn"
 							}
 						}
 					]

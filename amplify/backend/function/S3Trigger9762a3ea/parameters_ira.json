@@ -1,5 +1,4 @@
 {
 	"S3UserfilesBucketName": "nail-designs8a75cc1e33ff41ce87163d1e14cfdfa9-dev",
-	"DynamoDBPhotosTableArn": "arn:aws:dynamodb:us-east-1:357527257673:table/Photo-au5vl37tpvezhkttnwv75vjlum-dev",
-	"ModeratorSNS": "arn:aws:sns:us-east-1:357527257673:moderation"
+	"DynamoDBPhotosTableArn": "arn:aws:dynamodb:us-east-1:357527257673:table/Photo-au5vl37tpvezhkttnwv75vjlum-dev"
 }

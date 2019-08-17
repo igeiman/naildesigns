@@ -1,21 +1,4 @@
 {
-    "dev": {
-        "awscloudformation": {
-            "AuthRoleName": "nail-designs-20190815214424-authRole",
-            "UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190815214424-unauthRole",
-            "AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190815214424-authRole",
-            "Region": "us-east-1",
-            "DeploymentBucketName": "nail-designs-20190815214424-deployment",
-            "UnauthRoleName": "nail-designs-20190815214424-unauthRole",
-            "StackName": "nail-designs-20190815214424",
-            "StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-20190815214424/6052ff80-bfc7-11e9-b3eb-0abba895ce2c"
-        },
-        "categories": {
-            "auth": {
-                "cognitof3c924d4": {}
-            }
-        }
-    },
     "meetup": {
         "awscloudformation": {
             "AuthRoleName": "nail-designs-20190815220336-authRole",
@@ -33,16 +16,16 @@
             }
         }
     },
-    "august": {
+    "snstest": {
         "awscloudformation": {
-            "AuthRoleName": "nail-designs-august-20190816044816-authRole",
-            "UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-august-20190816044816-unauthRole",
-            "AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-august-20190816044816-authRole",
+            "AuthRoleName": "nail-designs-snstest-20190816161742-authRole",
+            "UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-snstest-20190816161742-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-snstest-20190816161742-authRole",
             "Region": "us-east-1",
-            "DeploymentBucketName": "nail-designs-august-20190816044816-deployment",
-            "UnauthRoleName": "nail-designs-august-20190816044816-unauthRole",
-            "StackName": "nail-designs-august-20190816044816",
-            "StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-august-20190816044816/97289e80-c002-11e9-87c5-0ed7a3d4fec0"
+            "DeploymentBucketName": "nail-designs-snstest-20190816161742-deployment",
+            "UnauthRoleName": "nail-designs-snstest-20190816161742-unauthRole",
+            "StackName": "nail-designs-snstest-20190816161742",
+            "StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-snstest-20190816161742/e7823930-c062-11e9-8239-126f3d94de7e"
         },
         "categories": {
             "auth": {
