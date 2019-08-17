@@ -54,4 +54,3 @@ type Mutation {
 type Label {
     label: String!
 }
-

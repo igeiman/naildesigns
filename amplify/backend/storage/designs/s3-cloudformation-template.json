@@ -45,16 +45,18 @@
 			"Type": "String"
 		},
 		"s3PermissionsGuestPublic": {
-			"Type": "String"
-		},
+			"Type": "String",
+			"Default" : "DISALLOW"
+		},	
 		"s3PermissionsGuestUploads": {
-			"Type": "String"
-		},
+			"Type": "String",
+			"Default" : "DISALLOW"		},
 		"AuthenticatedAllowList": {
 			"Type": "String"
 		},
 		"GuestAllowList": {
-			"Type": "String"
+			"Type": "String",
+			"Default" : "DISALLOW"
 		},
 		"selectedGuestPermissions": {
 			"Type": "CommaDelimitedList"
@@ -64,7 +66,31 @@
 		},
 		"env": {
 			"Type": "String"
-		}
+		},
+		"triggerFunction": {
+			"Type": "String"
+		},
+	
+    
+    
+        "functionS3Trigger9762a3eaName": {
+            "Type": "String",
+            "Default": "functionS3Trigger9762a3eaName"
+        },
+        
+        "functionS3Trigger9762a3eaArn": {
+            "Type": "String",
+            "Default": "functionS3Trigger9762a3eaArn"
+        },
+        
+        "functionS3Trigger9762a3eaLambdaExecutionRole": {
+            "Type": "String",
+            "Default": "functionS3Trigger9762a3eaLambdaExecutionRole"
+        }
+        
+        
+    
+
 	},
 	"Conditions": {
 		"ShouldNotCreateEnvResources": {
@@ -141,18 +167,13 @@
 		}
 	},
 	"Resources": {
-		"InvokePhotoProcessorLambda": {
-			"Type" : "AWS::Lambda::Permission",
-			"Properties" : {
-				"Action" : "lambda:InvokeFunction",
-				"FunctionName" : "workshopphotoprocessor",
-				"Principal" : "s3.amazonaws.com",
-				"SourceAccount" :  { "Ref": "AWS::AccountId" },
-				"SourceArn": "arn:aws:s3:::naildesigns-dev"
-			}
-		},
 		"S3Bucket": {
 			"Type": "AWS::S3::Bucket",
+		     
+            "DependsOn": [
+				"TriggerPermissions"
+			],
+            
 			"DeletionPolicy" : "Retain",
 			"Properties": {
 				"BucketName": {
@@ -177,6 +198,24 @@
                         }
                     ]
                 },
+                 
+                "NotificationConfiguration": {
+                    "LambdaConfigurations": [
+                        {
+                            "Event": "s3:ObjectCreated:*",
+                            "Function": {
+                                "Ref": "functionS3Trigger9762a3eaArn"
+                            }
+                        },
+                        {
+                            "Event": "s3:ObjectRemoved:*",
+                            "Function": {
+                                "Ref": "functionS3Trigger9762a3eaArn"
+                            }
+                        }
+                    ]
+                },
+                
 				"CorsConfiguration": {
 					"CorsRules": [
 						{
@@ -203,69 +242,96 @@
 							"MaxAge": "3000"
 						}
 					]
-				},
-				"NotificationConfiguration": {
-					"LambdaConfigurations": [
-						{
-							"Function": {
-								"Fn::Join": [":", [
-									"arn:aws:lambda",
-									{ "Ref": "AWS::Region" },
-									{ "Ref": "AWS::AccountId" },
-									"function",
-									"workshopphotoprocessor"
-									]
-								]
-							},
-							"Event": "s3:ObjectCreated:Put",
-							"Filter": {
-								"S3Key": {
-									"Rules": [
-										{ "Name": "prefix", "Value": "uploads/" }
-									]
-								}
-							}
-						}
-					]
 				}
 			}
 		},
-		"DenyListS3BucketsAuth": {
-			"DependsOn": [ "S3Bucket" ],
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"PolicyName": "DenyListS3Buckets",
-				"Roles": [ { "Ref": "authRoleName" } ],
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Deny",
-							"Action": [ "s3:ListBucket" ],
-							"Resource": ["*"]
-						}
+	     
+	    "TriggerPermissions": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "functionS3Trigger9762a3eaName"
+                },
+                "Principal": "s3.amazonaws.com",
+                "SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                },
+                "SourceArn": {
+					"Fn::Join": [
+						"",
+						[
+							"arn:aws:s3:::",
+							{
+			                    "Fn::If": [
+			                        "ShouldNotCreateEnvResources",
+			                        {
+			                            "Ref": "bucketName"
+			                        },
+			                        {
+			                            "Fn::Join": [
+			                                "",
+			                                [
+			                                    {
+			                                        "Ref": "bucketName"
+			                                    },
+			                                    "-",
+			                                    {
+			                                        "Ref": "env"
+			                                    }
+			                                ]
+			                            ]
+			                        }
+			                    ]
+			                }
+						]
 					]
-				}
-			}
-		},
-		"DenyListS3BucketsGuest": {
-			"DependsOn": [ "S3Bucket" ],
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"PolicyName": "DenyListS3BucketsGuest",
-				"Roles": [ { "Ref": "unauthRoleName" } ],
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Deny",
-							"Action": [ "s3:ListBucket" ],
-							"Resource": ["*"]
-						}
-					]
-				}
-			}
-		},
+                }
+            }
+        },
+         "S3TriggerBucketPolicy": {
+            "DependsOn": [
+                "S3Bucket"
+            ],
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "amplify-lambda-execution-policy",
+                "Roles": [
+                    {
+                        "Ref": "functionS3Trigger9762a3eaLambdaExecutionRole"
+                    }
+                ],
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetObject",
+                                "s3:ListBucket",
+                                "s3:DeleteObject"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "S3Bucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+	    
 		"S3AuthPublicPolicy": {
 			"DependsOn": [
 				"S3Bucket"
@@ -289,7 +355,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedPublic"
-								} ]
+								} ] 
 							},
 							"Resource": [
 								{
@@ -333,7 +399,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedProtected"
-								} ]
+								} ] 
 							},
 							"Resource": [
 								{
@@ -377,7 +443,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedPrivate"
-								} ]
+								} ] 
 							},
 							"Resource": [
 								{
@@ -421,7 +487,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedUploads"
-								} ]
+								} ] 
 							},
 							"Resource": [
 								{
@@ -538,7 +604,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsGuestPublic"
-								} ]
+								} ] 
 							},
 							"Resource": [
 								{
@@ -582,7 +648,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsGuestUploads"
-								} ]
+								} ] 
 							},
 							"Resource": [
 								{

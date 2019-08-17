@@ -1,6 +1,6 @@
 {
 	"auth": {
-		"cognitoafe4cbce": {
+		"cognitof3c924d4": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation"
 		}
@@ -17,22 +17,25 @@
 	"storage": {
 		"designs": {
 			"service": "S3",
-			"providerPlugin": "awscloudformation"
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [
+				{
+					"category": "function",
+					"resourceName": "S3Trigger9762a3ea",
+					"attributes": [
+						"Name",
+						"Arn",
+						"LambdaExecutionRole"
+					]
+				}
+			]
 		}
 	},
 	"function": {
-		"workshopphotoprocessor": {
+		"S3Trigger9762a3ea": {
 			"service": "Lambda",
 			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": []
+			"build": true
 		}
-	},
-	"hosting": {
-		"S3AndCloudFront": {
-			"service": "S3AndCloudFront",
-			"providerPlugin": "awscloudformation"
-		}
-	},
-	"interactions": {}
+	}
 }

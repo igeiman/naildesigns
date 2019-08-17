@@ -1,19 +1,56 @@
 {
-	"dev": {
-		"awscloudformation": {
-			"AuthRoleName": "nail-designs-20190414134207-authRole",
-			"UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190414134207-unauthRole",
-			"AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190414134207-authRole",
-			"Region": "us-east-1",
-			"DeploymentBucketName": "nail-designs-20190414134207-deployment",
-			"UnauthRoleName": "nail-designs-20190414134207-unauthRole",
-			"StackName": "nail-designs-20190414134207",
-			"StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-20190414134207/a033b4b0-5edc-11e9-b1e8-12b31d3117be"
-		},
-		"categories": {
-			"auth": {
-				"cognitoafe4cbce": {}
-			}
-		}
-	}
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "nail-designs-20190815214424-authRole",
+            "UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190815214424-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190815214424-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "nail-designs-20190815214424-deployment",
+            "UnauthRoleName": "nail-designs-20190815214424-unauthRole",
+            "StackName": "nail-designs-20190815214424",
+            "StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-20190815214424/6052ff80-bfc7-11e9-b3eb-0abba895ce2c"
+        },
+        "categories": {
+            "auth": {
+                "cognitof3c924d4": {}
+            }
+        }
+    },
+    "meetup": {
+        "awscloudformation": {
+            "AuthRoleName": "nail-designs-20190815220336-authRole",
+            "UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190815220336-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-20190815220336-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "nail-designs-20190815220336-deployment",
+            "UnauthRoleName": "nail-designs-20190815220336-unauthRole",
+            "StackName": "nail-designs-20190815220336",
+            "StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-20190815220336/0f88e6c0-bfca-11e9-b411-12cb3b0f9c64"
+        },
+        "categories": {
+            "auth": {
+                "cognitof3c924d4": {}
+            }
+        }
+    },
+    "august": {
+        "awscloudformation": {
+            "AuthRoleName": "nail-designs-august-20190816044816-authRole",
+            "UnauthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-august-20190816044816-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::357527257673:role/nail-designs-august-20190816044816-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "nail-designs-august-20190816044816-deployment",
+            "UnauthRoleName": "nail-designs-august-20190816044816-unauthRole",
+            "StackName": "nail-designs-august-20190816044816",
+            "StackId": "arn:aws:cloudformation:us-east-1:357527257673:stack/nail-designs-august-20190816044816/97289e80-c002-11e9-87c5-0ed7a3d4fec0"
+        },
+        "categories": {
+            "auth": {
+                "cognitof3c924d4": {}
+            },
+            "function": {
+                "S3Trigger9762a3ea": {}
+            }
+        }
+    }
 }

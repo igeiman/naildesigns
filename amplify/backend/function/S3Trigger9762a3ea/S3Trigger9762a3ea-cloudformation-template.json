@@ -10,14 +10,63 @@
 		},
 		"DynamoDBPhotosTableArn": {
 			"Type": "String"
+		},
+		"ModeratorSNS": {
+			"Type": "String"
+		}
+	},
+	"Conditions": {
+		"ShouldNotCreateEnvResources": {
+			"Fn::Equals": [
+				{
+					"Ref": "env"
+				},
+				"NONE"
+			]
 		}
 	},
 	"Resources": {
 		"LambdaFunction": {
 			"Type": "AWS::Lambda::Function",
+			"Metadata": {
+				"aws:asset:path": "./src",
+				"aws:asset:property": "Code"
+			},
 			"Properties": {
 				"Handler": "index.handler",
-				"FunctionName": "workshopphotoprocessor",
+				"FunctionName": {
+					"Fn::If": [
+						"ShouldNotCreateEnvResources",
+						"S3Trigger9762a3ea",
+						{
+							"Fn::Join": [
+								"",
+								[
+									"S3Trigger9762a3ea",
+									"-",
+									{
+										"Ref": "env"
+									}
+								]
+							]
+						}
+					]
+				},
+				"Environment": {
+					"Variables": {
+						"ENV": {
+							"Ref": "env"
+						},
+						"THUMBNAIL_WIDTH": "80",
+						"THUMBNAIL_HEIGHT": "80",
+						"SNS_TOPIC": {
+							"Ref": "ModeratorSNS"
+						},
+						"DYNAMODB_PHOTOS_TABLE_ARN": {
+							"Ref": "DynamoDBPhotosTableArn"
+						}
+					}
+				},
 				"Role": {
 					"Fn::GetAtt": [
 						"LambdaExecutionRole",
@@ -26,30 +75,33 @@
 				},
 				"Runtime": "nodejs8.10",
 				"Timeout": "25",
-				"Environment": {
-					"Variables": {
-						"ENV": {
-							"Ref": "env"
-						},
-						"THUMBNAIL_WIDTH": "80",
-						"THUMBNAIL_HEIGHT": "80",
-						"EMAILS_LIST": "irkin13@gmail.com",
-						"SOURCE_EMAIL": "irkin13@gmail.com",
-						"DYNAMODB_PHOTOS_TABLE_ARN": {
-							"Ref": "DynamoDBPhotosTableArn"
-						}
-					}
-				},
 				"Code": {
-					"S3Bucket": "nail-designs-20190414134207-deployment",
-					"S3Key": "amplify-builds/workshopphotoprocessor-1558915264-latest-build.zip"
+					"S3Bucket": "nail-designs-august-20190816044816-deployment",
+					"S3Key": "amplify-builds/S3Trigger9762a3ea-706863614e444965624b-build.zip"
 				}
 			}
 		},
 		"LambdaExecutionRole": {
 			"Type": "AWS::IAM::Role",
 			"Properties": {
-				"RoleName": "photoalbumsLambdaRole91d2faf4",
+				"RoleName": {
+					"Fn::If": [
+						"ShouldNotCreateEnvResources",
+						"S3Trigger9762a3eaLambdaRole9762a3ea",
+						{
+							"Fn::Join": [
+								"",
+								[
+									"S3Trigger9762a3eaLambdaRole9762a3ea",
+									"-",
+									{
+										"Ref": "env"
+									}
+								]
+							]
+						}
+					]
+				},
 				"AssumeRolePolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
@@ -109,23 +161,10 @@
 						},
 						{
 							"Effect": "Allow",
-							"Action": [
-								"rekognition:DetectLabels",
-								"rekognition:DetectModerationLabels"
-							],
-							"Resource": "*"
-						},
-						{
-							"Effect": "Allow",
-							"Action": [
-								"ses:SendEmail"
-							],
-							"Resource": "*"
-						},
-						{
-							"Effect": "Allow",
 							"Action": "sns:Publish",
-							"Resource": "arn:aws:sns:us-east-1:357527257673:moderation"
+							"Resource": {
+								"Ref": "ModeratorSNS"
+							}
 						}
 					]
 				}
@@ -212,7 +251,8 @@
 						{
 							"Effect": "Allow",
 							"Action": [
-								"rekognition:detectLabels"
+								"rekognition:DetectLabels",
+								"rekognition:DetectModerationLabels"
 							],
 							"Resource": "*"
 						}
@@ -238,6 +278,11 @@
 		"Region": {
 			"Value": {
 				"Ref": "AWS::Region"
+			}
+		},
+		"LambdaExecutionRole": {
+			"Value": {
+				"Ref": "LambdaExecutionRole"
 			}
 		}
 	}
