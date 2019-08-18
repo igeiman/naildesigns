@@ -35,7 +35,22 @@
 		"S3Trigger9762a3ea": {
 			"service": "Lambda",
 			"providerPlugin": "awscloudformation",
-			"build": true
+			"build": true,
+			"dependsOn": [
+				{
+					"category": "sns",
+					"resourceName": "moderationTopic",
+					"attributes": [
+						"Arn"
+					]
+				}
+			]
+		}
+	},
+	"sns": {
+		"moderationTopic": {
+			"service": "SNS",
+			"providerPlugin": "awscloudformation"
 		}
 	}
 }

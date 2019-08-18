@@ -53,7 +53,7 @@ let detectParams = {
 	const explicitContent = await Rekognition.detectModerationLabels(detectParams).promise();
 	console.log("Explicit content call processed: " + JSON.stringify(explicitContent));
 	if (explicitContent.ModerationLabels.length) {
-		console.log("Explicit content detected", explicitContent.ModerationLabels.map((l) => l.Name.toLowerCase()));
+		console.log("Explicit content detected ", explicitContent.ModerationLabels.map((l) => l.Name.toLowerCase()));
 		return true;
 	}
 	else {

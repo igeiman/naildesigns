@@ -1,0 +1,36 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Metadata": {},
+	"Parameters": {
+		"moderatorEmail": {
+			"Type": "String",
+			"Description": "Moderators email",
+			"Default": "moderator@example.com"
+		},
+		"env": {
+			"Type": "String",
+			"Description": "The environment name. e.g. Dev, Test, or Production",
+			"Default": "NONE"
+		}
+	},
+	"Resources": {
+		"SNSTopic" : {
+			"Type" : "AWS::SNS::Topic",
+			"Properties" : {
+					"Subscription" : [ {
+							"Endpoint" : {
+								"Ref": "moderatorEmail"
+							},
+							"Protocol" : "email"
+					} ]
+			}
+		}
+	},
+	"Outputs": {
+		"Arn": {
+			"Value": {
+				"Ref": "SNSTopic"
+			}
+		}
+	}
+}
