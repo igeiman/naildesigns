@@ -1,9 +1,8 @@
 ### Application Deployment Process
 
 Pre-requisites:
- - SNS topic with email subscription for moderation messages
  - ARN of any DynomoDB table
- - Name of S3 buucket
+ - Name of S3 bucket
 
 1. `git clone git@github.com:igeiman/naildesigns.git && cd naildesigns`
 2. `git checkout [branch name]]`
