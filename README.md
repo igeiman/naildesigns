@@ -1,8 +1,8 @@
 ### Application Deployment Process
 
 Pre-requisites:
- - ARN of any DynomoDB table
- - Name of S3 bucket
+ - ARN of any existing DynomoDB table
+ - Name of existing S3 bucket
 
 1. `git clone git@github.com:igeiman/naildesigns.git && cd naildesigns`
 2. `git checkout [branch name]]`
@@ -22,3 +22,15 @@ Pre-requisites:
 10. `amplify hosting add` to add static hosting in S3
 11. `amplify publish` application is served from CloudFront distribution fronting static web site on S3
 12. `amplify env remove [env name]`, delete the environment
+
+Optional - Sentiment Analisys for Comments
+Since Amplify has a very opitionated way of deploying api component, i did not find a way to override the function that streams from DynamoDB to ES
+
+To add comprehend to the application:
+Add Comprehend permissions to already deployed DdbToEsFn:
+                "comprehend:DetectDominantLanguage",
+                "comprehend:DetectSentiment"
+
+Override functions code with the code in amplify/backend/python/python_streaming_function.py
+Working to find a way to deploy it properly.
+Please note this code will be overriden on any api change.
