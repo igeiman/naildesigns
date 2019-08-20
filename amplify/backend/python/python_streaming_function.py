@@ -199,10 +199,11 @@ def _lambda_handler(event, context):
         if record.get('eventSource') == 'aws:dynamodb' and doc_table_parts[0] == 'comment':
             languages = client.detect_dominant_language(Text=doc_fields['text'])['Languages']
             logger.debug("FOUND LANGUAGES: %s", json.dumps(languages))
-            sentiment = client.detect_sentiment(Text=doc_fields['text'],LanguageCode = languages[0]['LanguageCode'])
-            logger.debug("Sentiment of this Comment: %s", sentiment)
-            doc_fields['Sentiment'] = sentiment['Sentiment']
-            doc_fields['SentimentScore'] = (sentiment['SentimentScore'])
+            if languages[0]['LanguageCode'] in ['de', 'pt', 'en', 'it', 'fr', 'es']:
+                sentiment = client.detect_sentiment(Text=doc_fields['text'],LanguageCode = languages[0]['LanguageCode'])
+                logger.debug("Sentiment of this Comment: %s", sentiment)
+                doc_fields['Sentiment'] = sentiment['Sentiment']
+                doc_fields['SentimentScore'] = (sentiment['SentimentScore'])
         logger.debug("DOC FIELDS %s", doc_fields)
 
         doc_id = doc_fields['id'] if 'id' in doc_fields else compute_doc_index(
