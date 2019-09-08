@@ -1,4 +1,6 @@
 {
-	"S3UserfilesBucketName": "nail-designsb6286f79dcf24ac9807f70a578bf498c-september",
-	"DynamoDBPhotosTableArn": "arn:aws:dynamodb:us-east-1:357527257673:table/Photo-htzj2plp65dlhc5uso5tfo3l4y-september"
+	"S3UserfilesBucketName": "nail-designsb6286f79dcf24ac9807f70a578bf498c-newday",
+	"DynamoDBPhotosTableArn": "arn:aws:dynamodb:us-east-1:357527257673:table/Photo-334ewcn6rjbijeoj3ryqcpwb3m-newday",
+	"GraphQLApiEndpoint": "https://5xgwelwha5cgdexzzoexvozppu.appsync-api.us-east-1.amazonaws.com/graphql",
+	"GraphQLApiId": "334ewcn6rjbijeoj3ryqcpwb3m"
 }

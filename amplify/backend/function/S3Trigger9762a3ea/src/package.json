@@ -6,6 +6,9 @@
 	"license": "Apache-2.0",
 	"dependencies": {
 		"sharp": "^0.20.8",
-		"uuid": "^3.3.2"
+		"uuid": "^3.3.2",
+		"graphql-tag": "2.10.1",
+		"aws-appsync": "2.0.0",
+		"isomorphic-fetch": "2.2.1"
 	}
 }

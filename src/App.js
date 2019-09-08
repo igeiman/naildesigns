@@ -516,28 +516,29 @@ class AlbumDetailsLoader extends React.Component {
     // and remove the deleted photo from the list of photos
     const sleep = seconds =>
       new Promise(resolve => setTimeout(resolve, seconds * 1000));
-    if (
-      newData.onPhotoUploadDelete.bucket === "PhotoUploaded" &&
-      this.state.album.id === newData.onPhotoUploadDelete.id
-    ) {
-      console.log(
-        "CONGRATS! There was an upload for album: ",
-        newData.onPhotoUploadDelete.id,
-        "Current album: ",
-        this.state.album.id
-      );
 
-      await sleep(8);
-      this.state.hasMorePhotos = true;
+		console.log(
+			"Subscription was fired: ",
+			newData
+		);
+
+		// find out if this is one of the images we are displaying
+    var index = this.state.album.photos.items.findIndex(
+      element => element.id === newData.onPhotoUploadDelete.id
+		);
+
+		// In case this is not an image displayed let's refresh the Album
+    if (typeof index == "undefined" || index == -1) {
+			console.log("A NEW IMAGE uploaded")
+			this.state.hasMorePhotos = true;
       this.state.nextTokenForPhotos = null;
       this.state.album = null;
       this.loadMorePhotos();
-      return;
-    }
-    var index = this.state.album.photos.items.findIndex(
-      element => element.id === newData.onPhotoUploadDelete.id
-    );
-    if (typeof index == "undefined") return;
+			return
+		};
+
+		// In case this is one on the images we display we should remove it - it was delete notification
+		console.log("OUR INDEX IS CALLED, deleting it ", index)
     this.state.album.photos.items.splice(index, 1);
   };
 

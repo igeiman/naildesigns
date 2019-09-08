@@ -17,6 +17,37 @@ docker run -v "$PWD":/var/task lambci/lambda:build-nodejs8.10 npm install
 */
 const Sharp = require('sharp');
 
+/*
+To allow real time updates with subscription upon photo upload we need
+add Photos to DynamoDB via AppSync endpoint called from Lambda function
+https://aws.amazon.com/blogs/mobile/supporting-backend-and-internal-processes-with-aws-appsync-multiple-authorization-types/
+*/
+const AUTH_TYPE = require('aws-appsync/lib/link/auth-link').AUTH_TYPE;
+const AWSAppSyncClient = require('aws-appsync').default;
+const gql = require('graphql-tag');
+require('isomorphic-fetch');
+
+
+const createPhotoMutation =
+`mutation createPhoto($input: CreatePhotoInput!) {
+	createPhoto(input: $input) {
+    bucket
+    id
+  }
+}`;
+
+const config = {
+  url: process.env.APPSYNC_ENDPOINT,
+  region: process.env.AWS_REGION,
+  auth: {
+    type: AUTH_TYPE.AWS_IAM,
+    credentials: AWS.config.credentials,
+  },
+  disableOffline: true
+};
+
+const client = new AWSAppSyncClient(config);
+
 // We'll expect these environment variables to be defined when the Lambda function is deployed
 const THUMBNAIL_WIDTH = parseInt(process.env.THUMBNAIL_WIDTH, 10);
 const THUMBNAIL_HEIGHT = parseInt(process.env.THUMBNAIL_HEIGHT, 10);
@@ -67,6 +98,22 @@ function storePhotoInfo(item) {
         TableName: DYNAMODB_PHOTOS_TABLE_NAME
     };
     return DynamoDBDocClient.put(params).promise();
+}
+
+async function sendPhotoToAppSync(item){
+	try {
+		console.log("About to send data to graphQL")
+		console.log("Sending data ", item)
+		const result = await client.mutate({
+		  mutation: gql(createPhotoMutation),
+		  variables: {input: item}
+		});
+		console.log("Result from the AppSync mutation: ", result.data);
+		callback(null, result.data);
+	  } catch (e) {
+		console.warn('Error sending mutation: ',  e);
+		callback(Error(e));
+	  }
 }
 
 async function getMetadata(bucketName, key) {
@@ -170,12 +217,14 @@ async function processRecord(record) {
 	}
 
     const labelNames = await getLabelNames(bucketName, sizes.fullsize.key);
-	const id = uuidv4();
+
 	if (! labelNames.includes("manicure") && !labelNames.includes("nail") ) {
 		console.log("Image does not contain nail designs! Exiting...")
 		// send emails via sns
 		return;
 	}
+
+	const id = uuidv4();
     const item = {
         id: id,
         owner: metadata.owner,
@@ -186,7 +235,9 @@ async function processRecord(record) {
         fullsize: sizes.fullsize,
         createdAt: new Date().getTime()
     }
-    await storePhotoInfo(item);
+	// await storePhotoInfo(item);
+	// send Create photo request to AppSync endpoint
+	await sendPhotoToAppSync(item);
 }
 
 exports.handler = async (event, context, callback) => {
