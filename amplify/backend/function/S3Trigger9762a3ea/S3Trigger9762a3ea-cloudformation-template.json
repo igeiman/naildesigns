@@ -17,9 +17,6 @@
 		},
 		"GraphQLApiEndpoint": {
 			"Type": "String"
-		},
-		"GraphQLApiId": {
-			"Type": "String"
 		}
 	},
 	"Conditions": {

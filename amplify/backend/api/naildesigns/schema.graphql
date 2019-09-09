@@ -37,7 +37,11 @@ type Comment @model  @searchable {
 	id: ID!
 	photo: Photo @connection(name: "CommentsPhoto")
     text: String!
-    sentiment: String
+    Sentiment: String
+	commentPhotoId: ID
+	SentimentScorePositive: Float
+	SentimentScoreNegative: Float
+	SentimentScoreNeutral: Float
 }
 
 type Subscription {

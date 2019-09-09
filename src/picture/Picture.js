@@ -21,13 +21,29 @@ const GetPhoto = `query GetPhoto($id: ID!) {
 	}
 }`;
 
+// Get all positive sentiment components for a photo
+const GetPositiveSentiments = `query searchComments($id: ID!) {
+  searchComments(limit: 100, filter: { commentPhotoId: { eq: $id }}) {
+    items {
+      text
+      Sentiment
+      SentimentScorePositive
+      SentimentScoreNeutral
+      commentPhotoId
+      }
+    }
+  }`;
+
+
+
 export default class Picture extends Component {
   constructor(props) {
     super(props);
     this.state = {
       status: false,
       photoId: this.props.id,
-      count: 0
+			count: 0,
+			positivity: -1
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handlePhotoClick.bind(this);
@@ -75,6 +91,22 @@ export default class Picture extends Component {
     );
     console.log("Getting the latest score ", result);
     this.setState({ count: result.data.getPhoto.score });
+	}
+
+	async getSentiment() {
+    const result = await API.graphql(
+      graphqlOperation(GetPositiveSentiments, {
+        id: this.props.id
+       })
+		 );
+		if (result.data.searchComments.items.length !== 0) {
+      var sentiments = result.data.searchComments.items;
+			console.log("Getting the sentiments for the photo ", sentiments);
+			var positiveSentiments = sentiments.filter(a => a.Sentiment === "POSITIVE");
+			console.log("Positive sentiments ", positiveSentiments);
+			this.setState({ positivity:  positiveSentiments.length/sentiments.length});
+			console.log("Positivity level for this design ", this.state.positivity);
+    }
   }
 
   handleIncrement = async _product => {
@@ -90,7 +122,8 @@ export default class Picture extends Component {
     console.log("After update the score in DB" + result.data.updatePhoto.score);
   };
   render() {
-    this.state.count === 0 ? this.getScore() : void 0;
+		this.state.count === 0 ? this.getScore() : void 0;
+		this.state.positivity === -1 ? this.getSentiment(): void 0;
     return (
       <Card>
         <div

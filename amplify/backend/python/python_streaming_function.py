@@ -203,7 +203,9 @@ def _lambda_handler(event, context):
                 sentiment = client.detect_sentiment(Text=doc_fields['text'],LanguageCode = languages[0]['LanguageCode'])
                 logger.debug("Sentiment of this Comment: %s", sentiment)
                 doc_fields['Sentiment'] = sentiment['Sentiment']
-                doc_fields['SentimentScore'] = (sentiment['SentimentScore'])
+                doc_fields['SentimentScorePositive'] = (sentiment['SentimentScore']['Positive'])
+                doc_fields['SentimentScoreNeutral'] = (sentiment['SentimentScore']['Neutral'])
+                doc_fields['SentimentScoreNegative'] = (sentiment['SentimentScore']['Negative'])
         logger.debug("DOC FIELDS %s", doc_fields)
 
         doc_id = doc_fields['id'] if 'id' in doc_fields else compute_doc_index(
