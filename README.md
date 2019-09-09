@@ -48,8 +48,13 @@ https://github.com/aws-amplify/amplify-cli/issues/987
 ## Support for multiple Auth allows access from Lambda to AppSync and thus refresh upon photo upload
 https://aws.amazon.com/blogs/mobile/supporting-backend-and-internal-processes-with-aws-appsync-multiple-authorization-types/
 Important:
-- add this directive to AppSync console to the mutation and photo type, no support in CLI yet: @aws_iam @aws_cognito_user_pools
+- add this directive to AppSync console to the mutation and photo type, no support in CLI yet: D
 - add additional IAM authentication to AppSync console, no support in Amplify CLI yet
 
 ## Deployment To Amplify Console
 [![amplifybutton](https://oneclick.amplifyapp.com/button.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/igeiman/naildesigns)
+
+## TODO:
+- https://aws-amplify.github.io/docs/cli-toolchain/graphql (subscription for relations section)
+- change Picture.js to have subscription to commnets that are created for this photo
+- pass GraphQLAPI endpoint dynamically to photo processing Lambda

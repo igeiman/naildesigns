@@ -84,7 +84,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "nail-designs-newday-20190820001001-deployment",
-					"S3Key": "amplify-builds/S3Trigger9762a3ea-626b41305165362b7736-build.zip"
+					"S3Key": "amplify-builds/S3Trigger9762a3ea-7a643376576b6168655a-build.zip"
 				}
 			}
 		},

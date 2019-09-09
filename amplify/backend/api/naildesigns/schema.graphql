@@ -14,7 +14,7 @@ type Album @model {
     photos: [Photo] @connection(name: "AlbumPhotos")
 }
 
-type Photo @model  @searchable {
+type Photo @model(subscriptions: null)  @searchable {
     id: ID!
     album: Album @connection(name: "AlbumPhotos")
     bucket: String!
@@ -24,7 +24,8 @@ type Photo @model  @searchable {
 	comments: [Comment] @connection(name: "CommentsPhoto")
 	score: Int,
 	owner: String,
-	createdAt: AWSTimestamp
+	createdAt: AWSTimestamp,
+	photoAlbumId: ID
 }
 
 type PhotoS3Info {
@@ -47,14 +48,12 @@ type Comment @model  @searchable {
 type Subscription {
     upload(id: String!): Label
     	@aws_subscribe(mutations: ["labeled"])
-	onPhotoUploadDelete: Photo
+	onPhotoUploadDelete(photoAlbumId: ID): Photo
 		@aws_subscribe(mutations: ["createPhoto","deletePhoto"])
 }
 
 type Mutation {
     labeled( photoid: String!): Label!
-	uploadPhoto(albumId: ID!, action: String): Photo,
-	uploadPhotoLocal(albumId: ID!, action: String): Photo
 }
 
 type Label {

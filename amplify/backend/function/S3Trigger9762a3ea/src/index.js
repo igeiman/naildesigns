@@ -31,7 +31,7 @@ require('isomorphic-fetch');
 const createPhotoMutation =
 `mutation createPhoto($input: CreatePhotoInput!) {
 	createPhoto(input: $input) {
-    bucket
+	photoAlbumId
     id
   }
 }`;

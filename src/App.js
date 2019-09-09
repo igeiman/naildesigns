@@ -48,21 +48,11 @@ function makeComparator(key, order = "asc") {
   };
 }
 
-const UploadPhoto = `
-mutation UploadPhoto($albumId:ID!, $action: String)
-{
-	uploadPhoto(albumId: $albumId, action: $action)
-	{
-    id
-    bucket
-  }
-}`;
-
 const DeletePhoto = `mutation DeletePhoto($id: ID!){
   deletePhoto(input:{id: $id})
  {
    id
-   bucket
+   photoAlbumId
  }
 }`;
 
@@ -77,10 +67,10 @@ const ListAlbums = `query ListAlbums {
 }`;
 
 const SubscribeToUploadDeletePhoto = `
-subscription OnPhotoUploadDelete{
-  onPhotoUploadDelete{
+subscription OnPhotoUploadDelete($albumId: ID){
+  onPhotoUploadDelete(photoAlbumId: $albumId){
     id
-    bucket
+    photoAlbumId
   }
 }
 `;
@@ -217,13 +207,6 @@ class S3ImageUpload extends React.Component {
       customPrefix: { public: "uploads/" },
       metadata: { albumid: this.props.albumId }
     });
-    console.log("Triggering mutation for photo ", fileName);
-    await API.graphql(
-      graphqlOperation(UploadPhoto, {
-        albumId: this.props.albumId,
-        action: "PhotoUploaded"
-      })
-    );
   };
 
   onChange = async e => {
@@ -580,7 +563,7 @@ class AlbumDetailsLoader extends React.Component {
     return (
       <Connect
         query={graphqlOperation(GetAlbum)}
-        subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
+        subscription={graphqlOperation(SubscribeToUploadDeletePhoto, {albumId: this.props.id})}
         onSubscriptionMsg={this.onCreateOrDeletePhoto}
       >
         {({ data }) => {
