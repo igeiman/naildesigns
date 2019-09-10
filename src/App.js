@@ -454,7 +454,7 @@ class Lightbox extends Component {
 
 class AlbumsList extends React.Component {
   albumItems() {
-    const images = ["image1.png", "image2.png", "image3.png", "image4.png"];
+    const images = ["image1.png", "image2.png", "image3.png", "image4.png", "image4.png", "image4.png", "image4.png"];
     let imageIndex = 0;
     return this.props.albums.sort(makeComparator("name")).map(album => (
       <Card key={album.id} className="albumCard">
@@ -494,35 +494,27 @@ class AlbumDetailsLoader extends React.Component {
     };
   }
 
-  onCreateOrDeletePhoto = async (prevQuery, newData) => {
+  onCreateOrDeletePhoto =  (prev, newData) => {
     // When we get notified about the delete we need to update the state
     // and remove the deleted photo from the list of photos
-    const sleep = seconds =>
-      new Promise(resolve => setTimeout(resolve, seconds * 1000));
-
-		console.log(
-			"Subscription was fired: ",
-			newData
-		);
-
+    console.log("Subscription onCreateOrDeletePhoto fired ", newData)
 		// find out if this is one of the images we are displaying
-    var index = this.state.album.photos.items.findIndex(
-      element => element.id === newData.onPhotoUploadDelete.id
-		);
+     var index = this.state.album.photos.items.findIndex(
+       element => element.id === newData.onPhotoUploadDelete.id
+		 );
 
 		// In case this is not an image displayed let's refresh the Album
     if (typeof index == "undefined" || index == -1) {
-			console.log("A NEW IMAGE uploaded")
-			this.state.hasMorePhotos = true;
+		 	this.state.hasMorePhotos = true;
       this.state.nextTokenForPhotos = null;
       this.state.album = null;
       this.loadMorePhotos();
-			return
+		 	return
 		};
 
-		// In case this is one on the images we display we should remove it - it was delete notification
+	// In case this is one on the images we display we should remove it - it was delete notification
 		console.log("OUR INDEX IS CALLED, deleting it ", index)
-    this.state.album.photos.items.splice(index, 1);
+		this.state.album.photos.items.splice(index, 1);
   };
 
   async loadMorePhotos() {
@@ -567,7 +559,6 @@ class AlbumDetailsLoader extends React.Component {
         onSubscriptionMsg={this.onCreateOrDeletePhoto}
       >
         {({ data }) => {
-          console.log("In Connect , the data is ", JSON.stringify(data));
           return (
             <AlbumDetails
               loadingPhotos={this.state.loading}
@@ -613,7 +604,7 @@ class AlbumsListLoader extends React.Component {
     let updatedQuery = Object.assign({}, prevQuery);
     updatedQuery.listAlbums.items = prevQuery.listAlbums.items.concat([
       newData.onCreateAlbum
-    ]);
+		]);
     return updatedQuery;
   };
 
@@ -633,7 +624,6 @@ class AlbumsListLoader extends React.Component {
 					}
 
           if (data === undefined || !data.listAlbums) return;
-
           return <AlbumsList albums={data.listAlbums.items} />;
         }}
       </Connect>

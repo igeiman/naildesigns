@@ -34,7 +34,7 @@ type PhotoS3Info {
     height: Int!
 }
 
-type Comment @model  @searchable {
+type Comment @model(subscriptions: null)  @searchable {
 	id: ID!
 	photo: Photo @connection(name: "CommentsPhoto")
     text: String!
@@ -50,6 +50,8 @@ type Subscription {
     	@aws_subscribe(mutations: ["labeled"])
 	onPhotoUploadDelete(photoAlbumId: ID): Photo
 		@aws_subscribe(mutations: ["createPhoto","deletePhoto"])
+	onCreateComment(commentPhotoId: ID): Comment
+		@aws_subscribe(mutations: ["createComment","deleteComment"])
 }
 
 type Mutation {
