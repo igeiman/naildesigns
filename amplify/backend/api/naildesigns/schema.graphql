@@ -50,8 +50,8 @@ type Subscription {
     	@aws_subscribe(mutations: ["labeled"])
 	onPhotoUploadDelete(photoAlbumId: ID): Photo
 		@aws_subscribe(mutations: ["createPhoto","deletePhoto"])
-	onCreateComment(commentPhotoId: ID): Comment
-		@aws_subscribe(mutations: ["createComment","deleteComment"])
+	onUpdateComment(commentPhotoId: ID): Comment
+		@aws_subscribe(mutations: ["updateComment"])
 }
 
 type Mutation {

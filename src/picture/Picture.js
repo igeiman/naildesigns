@@ -36,9 +36,9 @@ const GetPositiveSentiments = `query searchComments($id: ID!) {
     }
   }`;
 
-	const SubscribeOnCreateComment = `
-	subscription OnCreateComment($photoId: ID){
-		onCreateComment(commentPhotoId: $photoId){
+	const onUpdateComment = `
+	subscription OnUpdateComment($photoId: ID){
+		onUpdateComment(commentPhotoId: $photoId){
 			id
 			commentPhotoId
 		}
@@ -102,7 +102,8 @@ export default class Picture extends Component {
 		 );
 		this.state.positivity = -1;
 		if (result.data.searchComments.items.length !== 0) {
-      var sentiments = result.data.searchComments.items;
+			var sentiments = result.data.searchComments.items;
+			console.log("Here are the SENTIMENTS: ", sentiments)
 			var positiveSentiments = sentiments.filter(a => a.Sentiment === "POSITIVE");
 			this.setState({ positivity:  positiveSentiments.length/sentiments.length});
 			console.log(
@@ -122,10 +123,10 @@ export default class Picture extends Component {
 		console.log("The latest score in Picture ", result);
 
 		API.graphql(
-			graphqlOperation(SubscribeOnCreateComment,{photoId: this.props.id})).
+			graphqlOperation(onUpdateComment,{photoId: this.props.id})).
 			subscribe({
 				next: (data) => {
-					//console.log('SUBSCRIPTION =', data);
+					console.log('SUBSCRIPTION =', data);
 					this.getSentiment();
 			}
 			});
@@ -170,7 +171,8 @@ export default class Picture extends Component {
         <Card.Content extra>
           <div className="count">
             <span style={this.styles} className={this.getBadgeClasses()}>
-              {this.formatCount()}
+							{/* {this.formatCount()} */}
+							{this.state.positivity}
             </span>
             <button
               onClick={() => this.handleIncrement({})}

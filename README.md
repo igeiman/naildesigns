@@ -56,6 +56,6 @@ Important:
 
 ## TODO:
 
-- https://aws-amplify.github.io/docs/cli-toolchain/graphql (subscription for relations section)
-- change Picture.js to have subscription to commnets that are created for this photo
+- https://aws-amplify.github.io/docs/cli-toolchain/graphql (subscription for relations section) - Done
+- change Picture.js to have subscription to commnets that are created for this photo -Done
 - pass GraphQLAPI endpoint dynamically to photo processing Lambda

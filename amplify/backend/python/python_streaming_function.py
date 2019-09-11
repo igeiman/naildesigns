@@ -21,6 +21,7 @@ from botocore.endpoint import BotocoreHTTPSession
 from botocore.session import Session
 from boto3.dynamodb.types import TypeDeserializer
 import boto3
+import requests
 client = boto3.client('comprehend')
 
 
@@ -28,6 +29,10 @@ client = boto3.client('comprehend')
 ES_ENDPOINT = os.environ['ES_ENDPOINT']
 ES_REGION = os.environ['ES_REGION']
 DEBUG = True if os.environ['DEBUG'] is not None else False
+
+#Adding AppSync endpoint and key as parameters - did not find how to work with AWS_IAM in python
+GRAPHQL_ENDPOINT = os.environ['GRAPHQL_ENDPOINT']
+GRAPHQL_KEY = os.environ['GRAPHQL_KEY']
 
 # ElasticSearch 6 deprecated having multiple mapping types in an index. Default to doc.
 DOC_TYPE = 'doc'
@@ -78,6 +83,7 @@ def post_data_to_es(payload, region, creds, host, path, method='POST', proto='ht
 def post_to_es(payload):
     '''Post data to ES cluster with exponential backoff'''
 
+    # Get aws_region and credentials to post signed URL to ES
     # Get aws_region and credentials to post signed URL to ES
     es_region = ES_REGION or os.environ['AWS_REGION']
     session = Session({'region': es_region})
@@ -184,6 +190,8 @@ def _lambda_handler(event, context):
             logger.warning('Unsupported event_name: %s', event_name)
 
         is_ddb_insert_or_update = (event_name == 'INSERT') or (event_name == 'MODIFY')
+        is_ddb_insert = (event_name == 'INSERT')
+        is_ddb_update = (event_name == 'MODIFY')
         is_ddb_delete = event_name == 'REMOVE'
         image_name = 'NewImage' if is_ddb_insert_or_update else 'OldImage'
 
@@ -238,7 +246,25 @@ def _lambda_handler(event, context):
     logger.info('Posting to ES: inserts=%s updates=%s deletes=%s, total_lines=%s, bytes_total=%s',
                 cnt_insert, cnt_modify, cnt_remove, len(es_actions) - 1, len(es_payload))
     logger.debug("PROPER PAYLOAD %s", es_payload)
-    post_to_es(es_payload)  # Post to ES with exponential backoff
+
+    if record.get('eventSource') == 'aws:dynamodb' and doc_table_parts[0] == 'comment' and is_ddb_update:
+        console.log("Not sending to ES to avod loops")
+    else:
+        post_to_es(es_payload)  # Post to ES with exponential backoff
+
+    #Send mutation to Dynamo to trigger subscription
+    if record.get('eventSource') == 'aws:dynamodb' and doc_table_parts[0] == 'comment' and is_ddb_insert:
+        postHeaders = {
+            'Content-Type': 'application/json',
+            'X-Api-Key': GRAPHQL_KEY
+        }
+        logger.info( "Comment id %s", doc_id)
+        query = "mutation {\n updateComment(input: {\n id: \"" + doc_id + "\" }\n) {\n id \n commentPhotoId}\n }\n "
+        payload = {"query": query }
+        logger.info("payload %s", payload)
+        # make the subscription request to the server and extract the presigned URL and topic information
+        r = requests.post(GRAPHQL_ENDPOINT, headers=postHeaders, json=payload)
+        logger.info( "Appsync response %s", r.json())
 
 
 # Global lambda handler - catches all exceptions to avoid dead letter in the DynamoDB Stream
