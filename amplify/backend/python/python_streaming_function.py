@@ -240,16 +240,17 @@ def _lambda_handler(event, context):
             # Action line with 'index' directive
             es_actions.append(json.dumps(action))
 
-    # Prepare bulk payload
-    es_actions.append('')  # Add one empty line to force final \n
-    es_payload = '\n'.join(es_actions)
-    logger.info('Posting to ES: inserts=%s updates=%s deletes=%s, total_lines=%s, bytes_total=%s',
-                cnt_insert, cnt_modify, cnt_remove, len(es_actions) - 1, len(es_payload))
-    logger.debug("PROPER PAYLOAD %s", es_payload)
+
 
     if record.get('eventSource') == 'aws:dynamodb' and doc_table_parts[0] == 'comment' and is_ddb_update:
-        console.log("Not sending to ES to avod loops")
+        logger.info("Not sending to ES to avod loops")
     else:
+        # Prepare bulk payload
+        es_actions.append('')  # Add one empty line to force final \n
+        es_payload = '\n'.join(es_actions)
+        logger.info('Posting to ES: inserts=%s updates=%s deletes=%s, total_lines=%s, bytes_total=%s',
+                cnt_insert, cnt_modify, cnt_remove, len(es_actions) - 1, len(es_payload))
+        logger.debug("PROPER PAYLOAD %s", es_payload)
         post_to_es(es_payload)  # Post to ES with exponential backoff
 
     #Send mutation to Dynamo to trigger subscription
