@@ -21,19 +21,46 @@ const GetPhoto = `query GetPhoto($id: ID!) {
 	}
 }`;
 
+
+
+// Get all positive sentiment components for a photo
+const GetPositiveSentiments = `query searchComments($id: ID!) {
+  searchComments(limit: 100, filter: { commentPhotoId: { eq: $id }}) {
+    items {
+      text
+      Sentiment
+      SentimentScorePositive
+      SentimentScoreNeutral
+      commentPhotoId
+      }
+    }
+  }`;
+
+	const onUpdateComment = `
+	subscription OnUpdateComment($photoId: ID){
+		onUpdateComment(commentPhotoId: $photoId){
+			id
+			commentPhotoId
+		}
+	}
+	`;
+
+
 export default class Picture extends Component {
   constructor(props) {
     super(props);
     this.state = {
       status: false,
       photoId: this.props.id,
-      count: 0
+			count: 0,
+			positivity: -1
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handlePhotoClick.bind(this);
     this.updateLibraryCount = this.updateLibraryCount.bind(this);
-    this.updateState = this.updateState.bind(this);
-  }
+		this.updateState = this.updateState.bind(this);
+	}
+
 
   updateState(id) {
     console.log("updateState:::" + id);
@@ -55,7 +82,6 @@ export default class Picture extends Component {
     this.setState({ status: !this.state.status }, this.updateLibraryCount);
   }
   handleClick() {
-    console.log("this is:");
     console.log("this is:", this);
   }
   getBadgeClasses() {
@@ -66,16 +92,45 @@ export default class Picture extends Component {
   formatCount() {
     const { count } = this.state;
     return count === 0 ? "Zero" : count;
-  }
+	}
+
+	async getSentiment() {
+    const result = await API.graphql(
+      graphqlOperation(GetPositiveSentiments, {
+        id: this.props.id
+       })
+		 );
+		this.state.positivity = -1;
+		if (result.data.searchComments.items.length !== 0) {
+			var sentiments = result.data.searchComments.items;
+			console.log("Here are the SENTIMENTS: ", sentiments)
+			var positiveSentiments = sentiments.filter(a => a.Sentiment === "POSITIVE");
+			this.setState({ positivity:  positiveSentiments.length/sentiments.length});
+			console.log(
+				  "Positivity level for this design ", this.state.positivity,
+					"number of sentiments", sentiments.length,
+					"number of positive sentimenst", positiveSentiments.length);
+		}
+	}
+
   async getScore() {
     const result = await API.graphql(
       graphqlOperation(GetPhoto, {
         id: this.props.id
       })
-    );
-    console.log("Getting the latest score ", result);
-    this.setState({ count: result.data.getPhoto.score });
-  }
+		);
+		this.setState({ count: result.data.getPhoto.score });
+		console.log("The latest score in Picture ", result);
+
+		API.graphql(
+			graphqlOperation(onUpdateComment,{photoId: this.props.id})).
+			subscribe({
+				next: (data) => {
+					console.log('SUBSCRIPTION =', data);
+					this.getSentiment();
+			}
+			});
+	}
 
   handleIncrement = async _product => {
     const result = await API.graphql(
@@ -85,13 +140,15 @@ export default class Picture extends Component {
       })
     );
 
-    console.log("Increment Clicked", result.data.updatePhoto.score);
+    //console.log("Increment Clicked", result.data.updatePhoto.score);
     this.setState({ count: result.data.updatePhoto.score });
-    console.log("After update the score in DB" + result.data.updatePhoto.score);
+    //console.log("After update the score in DB" + result.data.updatePhoto.score);
   };
   render() {
-    this.state.count === 0 ? this.getScore() : void 0;
+		this.state.count === 0 ? this.getScore() : void 0;
+		this.state.positivity === -1 ? this.getSentiment(): void 0;
     return (
+
       <Card>
         <div
           onClick={() => this.props.removeImage(this.props.id)}
@@ -106,7 +163,6 @@ export default class Picture extends Component {
           onClick={() => this.handleClick(this.props.cover)}
           style={{ width: 130 + "px", height: 175 + "px" }}
         />
-
         <Card.Content>
           <Card.Header>
             <label>Click to comment</label>
@@ -115,7 +171,8 @@ export default class Picture extends Component {
         <Card.Content extra>
           <div className="count">
             <span style={this.styles} className={this.getBadgeClasses()}>
-              {this.formatCount()}
+							{/* {this.formatCount()} */}
+							{this.state.positivity}
             </span>
             <button
               onClick={() => this.handleIncrement({})}

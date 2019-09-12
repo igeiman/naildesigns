@@ -48,21 +48,11 @@ function makeComparator(key, order = "asc") {
   };
 }
 
-const UploadPhoto = `
-mutation UploadPhoto($albumId:ID!, $action: String)
-{
-	uploadPhoto(albumId: $albumId, action: $action)
-	{
-    id
-    bucket
-  }
-}`;
-
 const DeletePhoto = `mutation DeletePhoto($id: ID!){
   deletePhoto(input:{id: $id})
  {
    id
-   bucket
+   photoAlbumId
  }
 }`;
 
@@ -77,10 +67,10 @@ const ListAlbums = `query ListAlbums {
 }`;
 
 const SubscribeToUploadDeletePhoto = `
-subscription OnPhotoUploadDelete{
-  onPhotoUploadDelete{
+subscription OnPhotoUploadDelete($albumId: ID){
+  onPhotoUploadDelete(photoAlbumId: $albumId){
     id
-    bucket
+    photoAlbumId
   }
 }
 `;
@@ -217,13 +207,6 @@ class S3ImageUpload extends React.Component {
       customPrefix: { public: "uploads/" },
       metadata: { albumid: this.props.albumId }
     });
-    console.log("Triggering mutation for photo ", fileName);
-    await API.graphql(
-      graphqlOperation(UploadPhoto, {
-        albumId: this.props.albumId,
-        action: "PhotoUploaded"
-      })
-    );
   };
 
   onChange = async e => {
@@ -471,7 +454,7 @@ class Lightbox extends Component {
 
 class AlbumsList extends React.Component {
   albumItems() {
-    const images = ["image1.png", "image2.png", "image3.png", "image4.png"];
+    const images = ["image1.png", "image2.png", "image3.png", "image4.png", "image4.png", "image4.png", "image4.png"];
     let imageIndex = 0;
     return this.props.albums.sort(makeComparator("name")).map(album => (
       <Card key={album.id} className="albumCard">
@@ -511,34 +494,27 @@ class AlbumDetailsLoader extends React.Component {
     };
   }
 
-  onCreateOrDeletePhoto = async (prevQuery, newData) => {
+  onCreateOrDeletePhoto =  (prev, newData) => {
     // When we get notified about the delete we need to update the state
     // and remove the deleted photo from the list of photos
-    const sleep = seconds =>
-      new Promise(resolve => setTimeout(resolve, seconds * 1000));
-    if (
-      newData.onPhotoUploadDelete.bucket === "PhotoUploaded" &&
-      this.state.album.id === newData.onPhotoUploadDelete.id
-    ) {
-      console.log(
-        "CONGRATS! There was an upload for album: ",
-        newData.onPhotoUploadDelete.id,
-        "Current album: ",
-        this.state.album.id
-      );
+    console.log("Subscription onCreateOrDeletePhoto fired ", newData)
+		// find out if this is one of the images we are displaying
+     var index = this.state.album.photos.items.findIndex(
+       element => element.id === newData.onPhotoUploadDelete.id
+		 );
 
-      await sleep(8);
-      this.state.hasMorePhotos = true;
+		// In case this is not an image displayed let's refresh the Album
+    if (typeof index == "undefined" || index == -1) {
+		 	this.state.hasMorePhotos = true;
       this.state.nextTokenForPhotos = null;
       this.state.album = null;
       this.loadMorePhotos();
-      return;
-    }
-    var index = this.state.album.photos.items.findIndex(
-      element => element.id === newData.onPhotoUploadDelete.id
-    );
-    if (typeof index == "undefined") return;
-    this.state.album.photos.items.splice(index, 1);
+		 	return
+		};
+
+	// In case this is one on the images we display we should remove it - it was delete notification
+		console.log("OUR INDEX IS CALLED, deleting it ", index)
+		this.state.album.photos.items.splice(index, 1);
   };
 
   async loadMorePhotos() {
@@ -579,11 +555,10 @@ class AlbumDetailsLoader extends React.Component {
     return (
       <Connect
         query={graphqlOperation(GetAlbum)}
-        subscription={graphqlOperation(SubscribeToUploadDeletePhoto)}
+        subscription={graphqlOperation(SubscribeToUploadDeletePhoto, {albumId: this.props.id})}
         onSubscriptionMsg={this.onCreateOrDeletePhoto}
       >
         {({ data }) => {
-          console.log("In Connect , the data is ", JSON.stringify(data));
           return (
             <AlbumDetails
               loadingPhotos={this.state.loading}
@@ -629,7 +604,7 @@ class AlbumsListLoader extends React.Component {
     let updatedQuery = Object.assign({}, prevQuery);
     updatedQuery.listAlbums.items = prevQuery.listAlbums.items.concat([
       newData.onCreateAlbum
-    ]);
+		]);
     return updatedQuery;
   };
 
@@ -649,7 +624,6 @@ class AlbumsListLoader extends React.Component {
 					}
 
           if (data === undefined || !data.listAlbums) return;
-
           return <AlbumsList albums={data.listAlbums.items} />;
         }}
       </Connect>

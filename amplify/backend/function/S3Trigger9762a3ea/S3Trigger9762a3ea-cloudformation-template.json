@@ -14,6 +14,9 @@
 		"snsmoderationTopicArn": {
 			"Type": "String",
 			"Default": "snsmoderationTopicArn"
+		},
+		"GraphQLApiEndpoint": {
+			"Type": "String"
 		}
 	},
 	"Conditions": {
@@ -65,6 +68,9 @@
 						},
 						"DYNAMODB_PHOTOS_TABLE_ARN": {
 							"Ref": "DynamoDBPhotosTableArn"
+						},
+						"APPSYNC_ENDPOINT": {
+							"Ref": "GraphQLApiEndpoint"
 						}
 					}
 				},
@@ -77,8 +83,8 @@
 				"Runtime": "nodejs8.10",
 				"Timeout": "25",
 				"Code": {
-					"S3Bucket": "nail-designs-snstest-20190816161742-deployment",
-					"S3Key": "amplify-builds/S3Trigger9762a3ea-376641572f46384b786e-build.zip"
+					"S3Bucket": "nail-designs-newday-20190820001001-deployment",
+					"S3Key": "amplify-builds/S3Trigger9762a3ea-7a643376576b6168655a-build.zip"
 				}
 			}
 		},
@@ -165,6 +171,13 @@
 							"Action": "sns:Publish",
 							"Resource": {
 								"Ref": "snsmoderationTopicArn"
+							}
+						},
+						{
+							"Effect": "Allow",
+							"Action": "appsync:GraphQL",
+							"Resource": {
+								"Fn::Sub": "*"
 							}
 						}
 					]

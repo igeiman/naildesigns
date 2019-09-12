@@ -20,7 +20,8 @@ const GetPhoto = `query GetPhoto($id: ID!) {
 const CreateComment = `mutation CreateComment($text: String!, $commentPhotoId: ID!) {
 	createComment(input:{text: $text, commentPhotoId: $commentPhotoId}){
   	id
-    text
+		text
+		commentPhotoId
 	}
 }`;
 
