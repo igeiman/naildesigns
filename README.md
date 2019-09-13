@@ -30,14 +30,17 @@ Optional - Sentiment Analisys for Comments
 Since Amplify has a very opitionated way of deploying api component, i did not find a way to override the function that streams from DynamoDB to ES
 
 To add comprehend to the application:
-Add Comprehend permissions to already deployed DdbToEsFn:
+Add Comprehend and SSM permissions to already deployed DdbToEsFn:
                 "comprehend:DetectDominantLanguage",
-                "comprehend:DetectSentiment"
+                "comprehend:DetectSentiment",
+				"ssm:GetParameter"
 
 Override functions code with the code in amplify/backend/python/python_streaming_function.py
-Working to find a way to deploy it properly.
-Sentiment analisys can be performed on comments in the following langiages: [de, pt, en, it, fr, es]
-Please note this code will be overriden on any api change.
+Update lambda
+https://docs.aws.amazon.com/lambda/latest/dg/lambda-python-how-to-create-deployment-package.html
+```zip -g function.zip python_streaming_function.py
+ aws lambda update-function-code --function-name DdbToEsFn-334ewcn6rjbijeoj3ryqcpwb3m-newday  --zip-file fileb://function.zip```
+Add API key for the GraphQL endpoint to the SSM parameters store with the name /[env]/qgl_key
 
 ## With the change below, there is now a way to implement a custom Lambda for Comment table:
 https://github.com/aws-amplify/amplify-cli/issues/987
@@ -59,3 +62,5 @@ Important:
 - https://aws-amplify.github.io/docs/cli-toolchain/graphql (subscription for relations section) - Done
 - change Picture.js to have subscription to commnets that are created for this photo -Done
 - pass GraphQLAPI endpoint dynamically to photo processing Lambda
+- Remove secrets from Environment variables, add them to SSM parameter store
+

@@ -23,6 +23,7 @@ from boto3.dynamodb.types import TypeDeserializer
 import boto3
 import requests
 client = boto3.client('comprehend')
+ssm_client = boto3.client('ssm')
 
 
 # The following parameters are required to configure the ES cluster
@@ -32,7 +33,7 @@ DEBUG = True if os.environ['DEBUG'] is not None else False
 
 #Adding AppSync endpoint and key as parameters - did not find how to work with AWS_IAM in python
 GRAPHQL_ENDPOINT = os.environ['GRAPHQL_ENDPOINT']
-GRAPHQL_KEY = os.environ['GRAPHQL_KEY']
+ENV = os.environ['ENV']
 
 # ElasticSearch 6 deprecated having multiple mapping types in an index. Default to doc.
 DOC_TYPE = 'doc'
@@ -63,6 +64,20 @@ class ES_Exception(Exception):
         Exception.__init__(
             self, 'ES_Exception: status_code={}, payload={}'.format(status_code, payload))
 
+# Get API key from SSM parameters store
+def get_gql_key():
+    gql_key = ''
+    ssm_parameter_name= '/' + ENV + '/' + 'qgl_key'
+    try:
+        gql_key = ssm_client.get_parameter(
+            Name = ssm_parameter_name,
+            WithDecryption=False
+        )
+    except:
+        print("Encountered an error loading graphql key from SSM.")
+        traceback.print_exc()
+    finally:
+        return gql_key["Parameter"]["Value"]
 
 # Low-level POST data to Amazon Elasticsearch Service generating a Sigv4 signed request
 def post_data_to_es(payload, region, creds, host, path, method='POST', proto='https://'):
@@ -253,11 +268,13 @@ def _lambda_handler(event, context):
         logger.debug("PROPER PAYLOAD %s", es_payload)
         post_to_es(es_payload)  # Post to ES with exponential backoff
 
-    #Send mutation to Dynamo to trigger subscription
+    # Send mutation to Dynamo to trigger subscription
     if record.get('eventSource') == 'aws:dynamodb' and doc_table_parts[0] == 'comment' and is_ddb_insert:
+        # added a delay to ensure the record landed and indexed
+        gql_api_key = get_gql_key()
         postHeaders = {
             'Content-Type': 'application/json',
-            'X-Api-Key': GRAPHQL_KEY
+            'X-Api-Key': gql_api_key
         }
         logger.info( "Comment id %s", doc_id)
         query = "mutation {\n updateComment(input: {\n id: \"" + doc_id + "\" }\n) {\n id \n commentPhotoId}\n }\n "
