@@ -504,7 +504,7 @@ class AlbumDetailsLoader extends React.Component {
 		 );
 
 		// In case this is not an image displayed let's refresh the Album
-    if (typeof index == "undefined" || index == -1) {
+    if (typeof index === "undefined" || index === -1) {
 		 	this.state.hasMorePhotos = true;
       this.state.nextTokenForPhotos = null;
       this.state.album = null;
